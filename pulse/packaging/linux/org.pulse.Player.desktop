@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Pulse
+GenericName=Media Player
+Comment=Play anything. Feel more.
+Exec=pulse %U
+Icon=org.pulse.Player
+Terminal=false
+Categories=AudioVideo;Player;Video;Audio;
+Keywords=video;audio;player;movie;music;stream;
+MimeType=video/mp4;video/x-matroska;video/webm;video/quicktime;video/x-msvideo;video/mpeg;video/ogg;video/x-flv;video/3gpp;audio/mpeg;audio/flac;audio/ogg;audio/x-wav;audio/aac;audio/mp4;audio/x-matroska;audio/opus;application/x-mpegurl;application/vnd.apple.mpegurl;x-scheme-handler/rtsp;x-scheme-handler/rtmp;x-scheme-handler/mms;
+StartupWMClass=pulse

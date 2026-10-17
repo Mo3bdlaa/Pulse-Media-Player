@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pulse — Now Playing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#111217}
+a{color:#FF8A4C}a:hover{color:#FFD166}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #FFD166;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 900px; background: #111217; color: #F7F4EF; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+
+  <header style="display: flex; align-items: center; gap: 16px; height: 56px; padding: 0 8px 0 20px; border-bottom: 1px solid #393944">
+    <a href="Main.dc.html" aria-label="Pulse home" style="flex: 0 0 auto; display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F7F4EF; width: 204px">
+      <svg width="30" height="24" viewBox="0 0 30 24" aria-hidden="true"><path d="M4 4.6c0-1.2 1.3-1.9 2.3-1.3l10.6 7.4c.9.6.9 1.9 0 2.6L6.3 20.7c-1 .6-2.3-.1-2.3-1.3z" fill="#FF6A28"></path><path d="M19.5 4.5l7 7.5-7 7.5" fill="none" stroke="#FFD166" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span style="font-size: 15px; font-weight: 700; letter-spacing: 0.32em">PULSE</span>
+    </a>
+    <label style="flex: 0 1 520px; margin: 0 auto; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 12px; background: #1F2430; border: 1px solid #393944; border-radius: 8px; color: #AAAAB3">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+      <input type="search" aria-label="Search or run a command" placeholder="Search or type a command" style="flex: 1; min-width: 0; background: transparent; border: 0; font-size: 14px; color: #F7F4EF">
+      <kbd style="font-family: Inter, sans-serif; font-size: 12px; color: #AAAAB3; border: 1px solid #393944; border-radius: 6px; padding: 2px 6px">Ctrl K</kbd>
+    </label>
+    <div style="display: flex; gap: 2px; color: #AAAAB3">
+      <button aria-label="Minimize" style="width: 44px; height: 36px; border: 0; background: transparent; border-radius: 6px; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+      <button aria-label="Maximize" style="width: 44px; height: 36px; border: 0; background: transparent; border-radius: 6px; display: grid; place-items: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg></button>
+      <button aria-label="Close" style="width: 44px; height: 36px; border: 0; background: transparent; border-radius: 6px; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+    </div>
+  </header>
+
+  <div style="flex: 1; display: flex; flex-wrap: wrap">
+    <nav aria-label="Primary" style="flex: 1 1 232px; box-sizing: border-box; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid #393944">
+      <a href="NowPlaying.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; background: #2A2E39; color: #F7F4EF; text-decoration: none; font-size: 14px; font-weight: 600; box-shadow: inset 3px 0 0 #FF6A28">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6A28" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l11-2v12"></path><circle cx="6.5" cy="18" r="2.5"></circle><circle cx="17.5" cy="16" r="2.5"></circle></svg>Now Playing</a>
+      <a href="Queue.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"></path><path d="M4 6h.01M4 12h.01M4 18h.01" stroke-width="2.6"></path></svg>Queue</a>
+      <div aria-hidden="true" style="height: 1px; background: #393944; margin: 8px 6px"></div>
+      <a href="Main.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Home</a>
+      <a href="Library.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="18" rx="1.5"></rect><rect x="11" y="3" width="4" height="18" rx="1"></rect><path d="m17.5 4 3.5 16"></path></svg>Library</a>
+      <a href="Playlists.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h13M3 11h13M3 16h8"></path><path d="M16 14v6l5-3z" fill="currentColor"></path></svg>Playlists</a>
+      <a href="Network.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M2 9.5a14 14 0 0 1 20 0M5 12.8a9.5 9.5 0 0 1 14 0M8.2 16a5 5 0 0 1 7.6 0"></path><circle cx="12" cy="19.3" r="1.2" fill="currentColor"></circle></svg>Network</a>
+      <a href="Convert.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 8a8 8 0 0 0-14.5-2.5M4 3.5V8h4.5M4 16a8 8 0 0 0 14.5 2.5M20 20.5V16h-4.5"></path></svg>Convert</a>
+      <a href="Settings.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3h3.4l.5 2.4 1.9 1.1 2.3-.8 1.7 2.9-1.8 1.6v2.2l1.8 1.6-1.7 2.9-2.3-.8-1.9 1.1-.5 2.4h-3.4l-.5-2.4-1.9-1.1-2.3.8-1.7-2.9 1.8-1.6v-2.2L3.9 8.6l1.7-2.9 2.3.8 1.9-1.1z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a>
+    </nav>
+
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+      <section aria-label="Video" style="position: relative; height: 460px; overflow: hidden; background: radial-gradient(70% 70% at 30% 25%, rgba(59, 201, 160, 0.5) 0%, rgba(59, 201, 160, 0) 60%), radial-gradient(55% 55% at 75% 15%, rgba(110, 91, 216, 0.5) 0%, rgba(110, 91, 216, 0) 62%), radial-gradient(120% 70% at 50% 120%, #1B2433 0%, #0A0F18 55%), #05070C">
+        <div aria-hidden="true" style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(5, 7, 12, 0.85) 0%, rgba(5, 7, 12, 0) 55%), linear-gradient(0deg, rgba(5, 7, 12, 0.9) 0%, rgba(5, 7, 12, 0) 45%)"></div>
+        <div style="position: absolute; left: 40px; top: 40px; max-width: 520px; display: flex; flex-direction: column; gap: 12px">
+          <a href="VideoPlayer.dc.html" style="align-self: flex-start; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #D2D0CB; text-decoration: none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg>Back to full video</a>
+          <h1 style="margin: 0; font-size: 40px; line-height: 1.1; font-weight: 800; letter-spacing: -0.02em">Northern Lights Timelapse</h1>
+          <p style="margin: 0; font-size: 14px; color: #D2D0CB">12:48 · 4K · HEVC 10-bit · Stereo · from ~/Videos/Weekend</p>
+        </div>
+        <div style="position: absolute; left: 40px; right: 40px; bottom: 24px; display: flex; flex-direction: column; gap: 10px">
+          <div aria-hidden="true" style="position: relative; height: 6px; border-radius: 3px; background: rgba(247, 244, 239, 0.22)"><div style="width: 62%; height: 100%; border-radius: 3px; background: #FF6A28"></div><span style="position: absolute; left: calc(62% - 8px); top: -5px; width: 16px; height: 16px; border-radius: 8px; background: #F7F4EF"></span></div>
+          <div style="display: flex; align-items: center; gap: 12px">
+            <span style="font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; width: 110px">7:56 / 12:48</span>
+            <div style="flex: 1; display: flex; justify-content: center; align-items: center; gap: 10px">
+              <button aria-label="Previous" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: grid; place-items: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M18 5v14l-10-7z" fill="currentColor"></path><path d="M6 5v14"></path></svg></button>
+              <button aria-label="Pause" style="width: 56px; height: 56px; border: 0; border-radius: 28px; background: #FF6A28; color: #111217; display: grid; place-items: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"></rect><rect x="14" y="4.5" width="4" height="15" rx="1.2"></rect></svg></button>
+              <button aria-label="Next" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: grid; place-items: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 5v14l10-7z" fill="currentColor"></path><path d="M18 5v14"></path></svg></button>
+            </div>
+            <a href="VideoPlayer.dc.html" aria-label="Fullscreen" style="width: 110px; display: flex; justify-content: flex-end; color: #F7F4EF"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"></path></svg></a>
+          </div>
+        </div>
+      </section>
+
+      <div style="flex: 1; display: flex; flex-wrap: wrap">
+        <section style="flex: 999 1 420px; min-width: 0; box-sizing: border-box; padding: 20px 40px 32px; display: flex; flex-direction: column; gap: 18px">
+          <div role="tablist" aria-label="Details" style="display: flex; gap: 4px; border-bottom: 1px solid #393944">
+            <sc-for list="{{tabs}}" as="t" hint-placeholder-count="3">
+              <button role="tab" aria-selected="{{t.selected}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{isInfo}}" hint-placeholder-val="{{ true }}">
+            <dl style="margin: 0; display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 10px 16px; font-size: 14px">
+              <dt style="color: #AAAAB3">File</dt><dd style="margin: 0">Northern Lights Timelapse.mp4 · 1.8 GB</dd>
+              <dt style="color: #AAAAB3">Video</dt><dd style="margin: 0">HEVC Main 10 · 3840 × 2160 · 29.97 fps</dd>
+              <dt style="color: #AAAAB3">Audio</dt><dd style="margin: 0">English · AAC stereo (selected) · Commentary · Opus</dd>
+              <dt style="color: #AAAAB3">Subtitles</dt><dd style="margin: 0">English · SRT (selected) · Norwegian</dd>
+              <dt style="color: #AAAAB3">Title tag</dt><dd style="margin: 0; color: #AAAAB3">None in file — showing the file name</dd>
+            </dl>
+          </sc-if>
+          <sc-if value="{{isChapters}}" hint-placeholder-val="{{ false }}">
+            <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px">
+              <sc-for list="{{chapters}}" as="c" hint-placeholder-count="5">
+                <button style="{{c.style}}"><span style="{{c.thumb}}"></span><span style="display: block; font-size: 13px; font-weight: 600; margin-top: 8px">{{c.name}}</span><span style="display: block; font-size: 12px; color: #AAAAB3">{{c.time}}</span></button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{isTracks}}" hint-placeholder-val="{{ false }}">
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; font-size: 14px">
+              <div style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700">Audio</span><span style="padding: 10px 12px; border-radius: 10px; border: 1px solid #FF6A28; background: rgba(255, 106, 40, 0.1)">English · Stereo</span><span style="padding: 10px 12px; border-radius: 10px; border: 1px solid #393944">Commentary</span></div>
+              <div style="display: flex; flex-direction: column; gap: 6px"><span style="font-weight: 700">Subtitles</span><span style="padding: 10px 12px; border-radius: 10px; border: 1px solid #393944">Off</span><span style="padding: 10px 12px; border-radius: 10px; border: 1px solid #FF6A28; background: rgba(255, 106, 40, 0.1)">English · SRT</span><span style="padding: 10px 12px; border-radius: 10px; border: 1px solid #393944">Norwegian</span></div>
+            </div>
+          </sc-if>
+        </section>
+
+        <aside aria-labelledby="un" style="flex: 1 1 320px; box-sizing: border-box; padding: 20px 24px; border-left: 1px solid #393944; display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px">
+            <h2 id="un" style="margin: 0; font-size: 16px; font-weight: 700; flex: 1">Up next</h2>
+            <span style="font-size: 13px; color: #AAAAB3">Autoplay</span>
+            <button role="switch" aria-checked="true" aria-label="Autoplay" style="position: relative; width: 44px; height: 26px; border: 0; border-radius: 13px; background: #FF6A28"><span style="position: absolute; right: 3px; top: 3px; width: 20px; height: 20px; border-radius: 10px; background: #111217"></span></button>
+          </div>
+          <sc-for list="{{next}}" as="n" hint-placeholder-count="4">
+            <div style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 10px">
+              <span style="{{n.thumb}}"></span>
+              <span style="flex: 1; min-width: 0"><span style="display: block; font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{n.title}}</span><span style="display: block; font-size: 12px; color: #AAAAB3">{{n.len}}</span></span>
+            </div>
+          </sc-for>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'info' };
+  }
+  renderVals() {
+    const tab = this.state.tab;
+    const tabs = [['info', 'Info'], ['chapters', 'Chapters'], ['tracks', 'Audio & subtitles']].map(([id, label]) => ({
+      label: label, selected: id === tab ? 'true' : 'false',
+      pick: () => this.setState({ tab: id }),
+      style: 'height: 44px; padding: 0 14px; border: 0; background: transparent; font-size: 14px; ' + (id === tab ? 'color: #F7F4EF; font-weight: 600; box-shadow: inset 0 -2px 0 #FF6A28' : 'color: #AAAAB3; font-weight: 500')
+    }));
+    const hues = ['#6E5BD8', '#3BC9A0', '#4DABF7', '#69DB7C', '#FFD166'];
+    const chapters = [['Dusk', '0:00'], ['First light', '2:18'], ['Over the fjord', '5:14'], ['Corona', '7:25'], ['Morning', '10:22']].map(([name, time], i) => ({
+      name: name, time: time,
+      thumb: 'display: block; aspect-ratio: 16 / 9; border-radius: 8px; background: radial-gradient(90% 80% at 40% 30%, ' + hues[i] + ' 0%, rgba(0,0,0,0) 60%), linear-gradient(170deg, #142238, #070A10)',
+      style: 'padding: 0; border: 0; background: transparent; text-align: left;' + (i === 3 ? ' outline: 2px solid #FF6A28; outline-offset: 4px; border-radius: 8px' : '')
+    }));
+    const vid = (a) => 'flex: 0 0 auto; width: 80px; height: 45px; border-radius: 6px; background: radial-gradient(90% 80% at 30% 25%, ' + a + ' 0%, rgba(0,0,0,0) 55%), linear-gradient(170deg, #1F2430, #0B0D12)';
+    const next = [
+      ['Family Trip – Lisbon 2025.mov', '18:32', '#FFD166'],
+      ['Lecture 07 – Signals and Systems.mkv', '1:22:10', '#5C7CFA'],
+      ['Drone – Coastline.mp4', '6:14', '#4DABF7'],
+      ['Concert Recording.mkv', '48:20', '#E8590C']
+    ].map(([title, len, c]) => ({ title: title, len: len, thumb: vid(c) }));
+    return { tabs: tabs, chapters: chapters, next: next, isInfo: tab === 'info', isChapters: tab === 'chapters', isTracks: tab === 'tracks' };
+  }
+}
+</script>
+</body>
+</html>

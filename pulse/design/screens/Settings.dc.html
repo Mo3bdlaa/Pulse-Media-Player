@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pulse — Settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#111217}
+a{color:#FF8A4C}a:hover{color:#FFD166}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #FFD166;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 900px; background: #111217; color: #F7F4EF; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+
+  <header style="display: flex; align-items: center; gap: 16px; height: 56px; padding: 0 8px 0 20px; border-bottom: 1px solid #393944">
+    <a href="Main.dc.html" aria-label="Pulse home" style="flex: 0 0 auto; display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F7F4EF; width: 204px">
+      <svg width="30" height="24" viewBox="0 0 30 24" aria-hidden="true"><path d="M4 4.6c0-1.2 1.3-1.9 2.3-1.3l10.6 7.4c.9.6.9 1.9 0 2.6L6.3 20.7c-1 .6-2.3-.1-2.3-1.3z" fill="#FF6A28"></path><path d="M19.5 4.5l7 7.5-7 7.5" fill="none" stroke="#FFD166" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span style="font-size: 15px; font-weight: 700; letter-spacing: 0.32em">PULSE</span>
+    </a>
+    <label style="flex: 0 1 520px; margin: 0 auto; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 12px; background: #1F2430; border: 1px solid #393944; border-radius: 8px; color: #AAAAB3">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+      <input type="search" aria-label="Search or run a command" placeholder="Search or type a command" style="flex: 1; min-width: 0; background: transparent; border: 0; font-size: 14px; color: #F7F4EF">
+      <kbd style="font-family: Inter, sans-serif; font-size: 12px; color: #AAAAB3; border: 1px solid #393944; border-radius: 6px; padding: 2px 6px">Ctrl K</kbd>
+    </label>
+    <div style="display: flex; gap: 2px; color: #AAAAB3">
+      <button aria-label="Minimize" style="width: 44px; height: 36px; border: 0; background: transparent; border-radius: 6px; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+      <button aria-label="Maximize" style="width: 44px; height: 36px; border: 0; background: transparent; border-radius: 6px; display: grid; place-items: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg></button>
+      <button aria-label="Close" style="width: 44px; height: 36px; border: 0; background: transparent; border-radius: 6px; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+    </div>
+  </header>
+
+  <div style="flex: 1; display: flex; flex-wrap: wrap">
+    <nav aria-label="Primary" style="flex: 1 1 232px; box-sizing: border-box; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid #393944">
+      <a href="Main.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Home</a>
+      <a href="Library.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="18" rx="1.5"></rect><rect x="11" y="3" width="4" height="18" rx="1"></rect><path d="m17.5 4 3.5 16"></path></svg>Library</a>
+      <a href="Playlists.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h13M3 11h13M3 16h8"></path><path d="M16 14v6l5-3z" fill="currentColor"></path></svg>Playlists</a>
+      <a href="Network.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M2 9.5a14 14 0 0 1 20 0M5 12.8a9.5 9.5 0 0 1 14 0M8.2 16a5 5 0 0 1 7.6 0"></path><circle cx="12" cy="19.3" r="1.2" fill="currentColor"></circle></svg>Network</a>
+      <a href="Convert.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 8a8 8 0 0 0-14.5-2.5M4 3.5V8h4.5M4 16a8 8 0 0 0 14.5 2.5M20 20.5V16h-4.5"></path></svg>Convert</a>
+      <a href="Settings.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; background: #2A2E39; color: #F7F4EF; text-decoration: none; font-size: 14px; font-weight: 600; box-shadow: inset 3px 0 0 #FF6A28">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6A28" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3h3.4l.5 2.4 1.9 1.1 2.3-.8 1.7 2.9-1.8 1.6v2.2l1.8 1.6-1.7 2.9-2.3-.8-1.9 1.1-.5 2.4h-3.4l-.5-2.4-1.9-1.1-2.3.8-1.7-2.9 1.8-1.6v-2.2L3.9 8.6l1.7-2.9 2.3.8 1.9-1.1z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a>
+    </nav>
+
+    <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 32px 40px 40px; display: flex; flex-direction: column; gap: 24px">
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px">
+        <div style="flex: 1 1 280px">
+          <h1 style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.01em">Settings</h1>
+          <p style="margin: 6px 0 0; font-size: 14px; color: #AAAAB3">Saved as you change them. Nothing leaves this device.</p>
+        </div>
+        <label style="flex: 0 1 320px; display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 8px; border: 1px solid #393944; background: #1F2430; color: #AAAAB3">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input type="search" aria-label="Search settings" placeholder="Search settings" style="flex: 1; min-width: 0; border: 0; background: transparent; font-size: 14px; color: #F7F4EF"></label>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 28px">
+        <div role="tablist" aria-orientation="vertical" aria-label="Settings sections" style="flex: 1 1 200px; max-width: 220px; display: flex; flex-direction: column; gap: 2px">
+          <sc-for list="{{tabs}}" as="t" hint-placeholder-count="10">
+            <button role="tab" aria-selected="{{t.selected}}" onClick="{{t.pick}}" style="{{t.style}}">{{t.label}}</button>
+          </sc-for>
+        </div>
+
+        <section aria-label="{{title}}" style="flex: 999 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+          <h2 style="margin: 0; font-size: 20px; font-weight: 700">{{title}}</h2>
+          <div style="border-radius: 12px; background: #1F2430; border: 1px solid #393944">
+            <sc-for list="{{rows}}" as="r" hint-placeholder-count="6">
+              <div style="{{r.rowStyle}}">
+                <div style="flex: 1 1 260px; min-width: 0">
+                  <div style="font-size: 14px; font-weight: 600">{{r.label}}</div>
+                  <div style="font-size: 12px; line-height: 1.45; color: #AAAAB3; margin-top: 2px">{{r.desc}}</div>
+                </div>
+                <sc-if value="{{r.isToggle}}" hint-placeholder-val="{{ true }}">
+                  <button role="switch" aria-checked="{{r.checked}}" aria-label="{{r.label}}" onClick="{{r.flip}}" style="{{r.switchStyle}}"><span style="{{r.knobStyle}}"></span></button>
+                </sc-if>
+                <sc-if value="{{r.isSelect}}" hint-placeholder-val="{{ false }}">
+                  <span style="display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 200px; height: 40px; padding: 0 12px; border-radius: 8px; border: 1px solid #393944; background: #2A2E39; font-size: 13px; font-weight: 500">{{r.value}}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#AAAAB3" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></span>
+                </sc-if>
+                <sc-if value="{{r.isButton}}" hint-placeholder-val="{{ false }}">
+                  <button style="{{r.buttonStyle}}">{{r.value}}</button>
+                </sc-if>
+                <sc-if value="{{r.isText}}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size: 13px; color: #D2D0CB; font-variant-numeric: tabular-nums">{{r.value}}</span>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{showNote}}" hint-placeholder-val="{{ false }}">
+            <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #AAAAB3">{{note}}</p>
+          </sc-if>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { tab: 'general', flips: {} };
+  }
+  renderVals() {
+    const T = (label, desc, on) => ({ kind: 'toggle', label: label, desc: desc, on: on });
+    const S = (label, desc, value) => ({ kind: 'select', label: label, desc: desc, value: value });
+    const B = (label, desc, value, danger) => ({ kind: 'button', label: label, desc: desc, value: value, danger: danger });
+    const X = (label, desc, value) => ({ kind: 'text', label: label, desc: desc, value: value });
+    const sections = {
+      general: ['General', [
+        S('Language', 'Restart needed to apply.', 'System (English)'),
+        S('When Pulse starts', 'Opening a file always goes straight to playback.', 'Home'),
+        T('Keep a list of recent files', 'Shown on Home. Stored only on this device.', true),
+        T('Allow only one window', 'Files opened from the file manager reuse the running player.', true),
+        B('File associations', 'Choose which media types open in Pulse.', 'Manage…')
+      ], 'Import, export or reset all preferences from Advanced.'],
+      playback: ['Playback', [
+        S('Resume where I left off', 'Applies to files longer than 5 minutes.', 'Ask with a quick prompt'),
+        S('Seek step', 'Arrow keys and the ±10 buttons.', '10 seconds'),
+        S('Hide controls after', 'Controls stay while a menu or keyboard focus is active.', '3 seconds'),
+        T('Play the next item automatically', 'Continue through the queue or folder.', true),
+        T('Pause when minimized', 'Audio keeps playing.', false)
+      ]],
+      av: ['Audio & Video', [
+        T('Hardware decoding', 'Uses the GPU when the format supports it. Restart needed.', true),
+        S('Audio output', 'Follows the system default unless changed.', 'System default'),
+        T('Normalize volume', 'Evens out loud and quiet files.', false),
+        S('Default deinterlacing', '', 'Automatic')
+      ]],
+      subs: ['Subtitles', [
+        S('Preferred subtitle language', 'Used when a file has several tracks.', 'English'),
+        T('Load subtitle files next to the video', 'Matches files with the same name.', true),
+        S('Text size', '', 'Medium'),
+        S('Text style', '', 'White with outline'),
+        S('Encoding fallback', 'For files that are not UTF-8.', 'Automatic')
+      ]],
+      appearance: ['Appearance', [
+        S('Theme', 'Signal Ember dark. Light and system modes come later, once fully designed.', 'Dark'),
+        S('Interface density', '', 'Comfortable'),
+        T('Use media artwork as background', 'Audio player and Now Playing.', true),
+        T('Reduce motion', 'Follows the system setting by default.', false),
+        T('Use system window frame', 'Instead of the Pulse title bar.', false)
+      ]],
+      library: ['Library', [
+        B('Indexed folders', '2 folders · 1,248 items', 'Manage folders…'),
+        T('Scan on startup', 'Looks for new files in indexed folders.', false),
+        T('Online metadata', 'Posters, synopsis and cast from a provider you choose. Off by default.', false),
+        B('Clear library index', 'Removes the index only. Files are never touched.', 'Clear…', true)
+      ]],
+      network: ['Network', [
+        T('Discover devices on the local network', 'SMB and UPnP / DLNA.', true),
+        S('Network caching', 'Raise for unstable connections.', '1000 ms'),
+        B('Saved logins', 'Kept in the system keychain, never in logs.', 'Manage…')
+      ]],
+      shortcuts: ['Shortcuts', [
+        X('Play / pause', '', 'Space'),
+        X('Seek back / forward', '', '← / →'),
+        X('Volume', '', '↑ / ↓'),
+        X('Fullscreen', '', 'F'),
+        X('Mute', '', 'M'),
+        X('Cycle subtitles', '', 'V'),
+        B('Customize', 'Conflicts are shown before saving.', 'Edit shortcuts…')
+      ]],
+      advanced: ['Advanced', [
+        T('Debug logging', 'Writes a log file for troubleshooting. Passwords are never logged.', false),
+        B('Export preferences', 'Saves a settings file you can import elsewhere.', 'Export…'),
+        B('Import preferences', '', 'Import…'),
+        B('Reset all settings', 'Recent files and library stay.', 'Reset…', true)
+      ]],
+      about: ['About Pulse', [
+        X('Version', '', 'Pulse 0.1.0 (2026-10-17)'),
+        X('Playback engine', 'Built from upstream VLC sources, unmodified.', 'libVLC 4.0.0-dev'),
+        B('Release notes', '', 'View'),
+        B('Open-source licenses', 'Pulse is free software under the GNU GPL v2 or later.', 'View'),
+        X('Credits', 'Pulse is an independent project, not affiliated with or endorsed by VideoLAN.', 'VideoLAN and contributors')
+      ]]
+    };
+    const order = [['general', 'General'], ['playback', 'Playback'], ['av', 'Audio & Video'], ['subs', 'Subtitles'], ['appearance', 'Appearance'], ['library', 'Library'], ['network', 'Network'], ['shortcuts', 'Shortcuts'], ['advanced', 'Advanced'], ['about', 'About']];
+    const tab = this.state.tab;
+    const tabs = order.map(([id, label]) => ({
+      label: label, selected: id === tab ? 'true' : 'false',
+      pick: () => this.setState({ tab: id }),
+      style: 'height: 40px; padding: 0 14px; border: 0; border-radius: 8px; text-align: left; font-size: 14px; ' + (id === tab ? 'background: #2A2E39; color: #F7F4EF; font-weight: 600; box-shadow: inset 3px 0 0 #FF6A28' : 'background: transparent; color: #AAAAB3; font-weight: 500')
+    }));
+    const sec = sections[tab];
+    const flips = this.state.flips;
+    const rows = sec[1].map((r, i) => {
+      const key = tab + i;
+      const on = flips[key] === undefined ? r.on : flips[key];
+      return {
+        label: r.label, desc: r.desc, value: r.value,
+        isToggle: r.kind === 'toggle', isSelect: r.kind === 'select', isButton: r.kind === 'button', isText: r.kind === 'text',
+        checked: on ? 'true' : 'false',
+        flip: () => this.setState({ flips: Object.assign({}, flips, { [key]: !on }) }),
+        switchStyle: 'position: relative; flex: 0 0 auto; width: 44px; height: 26px; border: 0; border-radius: 13px; background: ' + (on ? '#FF6A28' : '#393944'),
+        knobStyle: 'position: absolute; top: 3px; width: 20px; height: 20px; border-radius: 10px; ' + (on ? 'right: 3px; background: #111217' : 'left: 3px; background: #AAAAB3'),
+        buttonStyle: 'height: 36px; padding: 0 14px; border-radius: 8px; font-size: 13px; font-weight: 600; ' + (r.danger ? 'border: 1px solid #FF5A63; background: transparent; color: #FF8A8F' : 'border: 1px solid #393944; background: #2A2E39'),
+        rowStyle: 'display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 16px 20px;' + (i > 0 ? ' border-top: 1px solid #393944' : '')
+      };
+    });
+    return { tabs: tabs, title: sec[0], rows: rows, showNote: !!sec[2], note: sec[2] || '' };
+  }
+}
+</script>
+</body>
+</html>

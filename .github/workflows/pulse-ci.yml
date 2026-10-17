@@ -1,0 +1,98 @@
+name: Pulse CI
+
+# Guards the two promises Pulse makes:
+#   1. upstream VLC files are never edited (so upstream merges cannot conflict)
+#   2. the Pulse app builds and passes its engine contract tests against the
+#      libVLC built from this exact tree (so an upstream API change is caught)
+
+on:
+  push:
+    branches: [master, "claude/**"]
+  pull_request:
+  workflow_call:
+    inputs:
+      ref:
+        description: Git ref to test (used by the upstream sync)
+        type: string
+        required: false
+  workflow_dispatch:
+
+concurrency:
+  group: pulse-ci-${{ inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  guards:
+    name: Isolation guards
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || '' }}
+          fetch-depth: 0
+      - name: Fetch upstream VLC history
+        run: |
+          git remote add upstream https://code.videolan.org/videolan/vlc.git
+          git fetch --no-tags --filter=tree:0 upstream master
+      - name: Upstream files untouched
+        run: pulse/tools/check-upstream-clean.sh upstream/master
+      - name: libVLC only used inside the engine adapter
+        run: pulse/tools/check-engine-boundary.sh
+      - name: Theme.qml matches design tokens
+        run: |
+          python3 pulse/tools/gen-theme.py
+          git diff --exit-code -- pulse/qml/theme/Theme.qml
+
+  linux:
+    name: Build and test (Linux)
+    runs-on: ubuntu-24.04
+    needs: guards
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || '' }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ninja-build pkg-config pipx xvfb libgl1-mesa-dri \
+            libavformat-dev libavcodec-dev libavutil-dev libswscale-dev \
+            qt6-base-dev qt6-declarative-dev qt6-svg-dev libgl-dev \
+            qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
+            qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtquick-dialogs \
+            qml6-module-qtquick-shapes qml6-module-qtqml-workerscript
+          pipx install 'meson>=1.10'
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Key libVLC cache on the upstream tree
+        id: core
+        run: echo "tree=$(git rev-parse HEAD:src HEAD:modules HEAD:lib HEAD:include HEAD:meson.build | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: build-libvlc/install
+          key: libvlc-minimal-${{ runner.os }}-${{ steps.core.outputs.tree }}
+      - name: Build libVLC from this tree
+        run: |
+          if [ ! -f build-libvlc/install/lib/pkgconfig/libvlc.pc ]; then
+            pulse/tools/build-libvlc.sh build-libvlc --profile minimal
+          fi
+      - name: Build Pulse
+        run: |
+          export PKG_CONFIG_PATH="$PWD/build-libvlc/install/lib/pkgconfig"
+          cmake -S pulse -B build-pulse -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-pulse
+      - name: Engine contract tests
+        run: |
+          export LD_LIBRARY_PATH="$(dirname "$(find "$PWD/build-libvlc/install" -name 'libvlc.so' | head -n1)")"
+          ctest --test-dir build-pulse --output-on-failure
+      - name: Smoke test — open a video and keep playing
+        run: |
+          export LD_LIBRARY_PATH="$(dirname "$(find "$PWD/build-libvlc/install" -name 'libvlc.so' | head -n1)")"
+          export PULSE_VLC_ARGS="--aout=adummy"
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -loglevel error -f lavfi -i testsrc2=size=640x360:rate=25:duration=8 -c:v mpeg4 smoke.mkv
+          xvfb-run -a -s "-screen 0 1280x800x24 +extension GLX" timeout --preserve-status -s INT 6 build-pulse/pulse smoke.mkv \
+            2>&1 | tee smoke.log || true
+          if grep -E "Aborted|Segmentation|failed to load component|ReferenceError|TypeError" smoke.log; then exit 1; fi

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pulse — Up next on phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#111217}
+a{color:#FF8A4C}a:hover{color:#FFD166}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD166;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #111217; color: #F7F4EF; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 8px; padding: 52px 8px 6px">
+    <a href="MobilePlayer.dc.html" aria-label="Back to player" style="width: 44px; height: 44px; border-radius: 22px; display: grid; place-items: center; color: #F7F4EF"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg></a>
+    <h1 style="flex: 1; margin: 0; font-size: 18px; font-weight: 700">Up next</h1>
+    <button style="height: 44px; padding: 0 12px; border: 0; border-radius: 10px; background: transparent; color: #FF8A4C; font-size: 14px; font-weight: 600">Edit</button>
+  </header>
+  <p style="margin: 0 20px 12px; font-size: 13px; color: #AAAAB3">9 items · 3 h 41 min · Weekend</p>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 0 16px 14px">
+    <button aria-pressed="false" style="display: flex; align-items: center; justify-content: center; gap: 6px; height: 44px; border-radius: 12px; border: 1px solid #393944; background: #1F2430; font-size: 13px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h3.5c2 0 3 1 4.5 3.5l2 3.5c1.5 2.5 2.5 3 4.5 3H21M3 17h3.5c1.4 0 2.3-.5 3.2-1.6M14.3 8.6C15.2 7.5 16 7 17.5 7H21M18 4l3 3-3 3M18 14l3 3-3 3"></path></svg>Shuffle</button>
+    <button aria-pressed="true" style="display: flex; align-items: center; justify-content: center; gap: 6px; height: 44px; border-radius: 12px; border: 1px solid #FF6A28; background: rgba(255, 106, 40, 0.12); color: #FFB08A; font-size: 13px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11V9a3 3 0 0 1 3-3h13M17 3l3 3-3 3M20 13v2a3 3 0 0 1-3 3H4M7 21l-3-3 3-3"></path></svg>Repeat</button>
+    <button style="display: flex; align-items: center; justify-content: center; gap: 6px; height: 44px; border-radius: 12px; border: 1px solid #393944; background: #1F2430; font-size: 13px; font-weight: 600">Save</button>
+  </div>
+
+  <div style="margin: 0 12px; display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 14px; background: #2A2E39; box-shadow: inset 3px 0 0 #FF6A28">
+    <span style="width: 80px; height: 45px; border-radius: 8px; flex: 0 0 auto; background: radial-gradient(90% 80% at 30% 20%, #3BC9A0 0%, rgba(0,0,0,0) 55%), linear-gradient(170deg, #142238, #070A10)"></span>
+    <span style="flex: 1; min-width: 0"><span style="display: block; font-size: 15px; font-weight: 600; color: #FF8A4C">Northern Lights Timelapse</span><span style="display: block; font-size: 12px; color: #AAAAB3">Now playing · 7:56 of 12:48</span></span>
+  </div>
+
+  <div style="flex: 1; overflow: hidden; padding: 8px 12px 0; display: flex; flex-direction: column">
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="7">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 12px">
+        <span style="{{r.thumb}}"></span>
+        <span style="flex: 1; min-width: 0"><span style="display: block; font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.title}}</span><span style="display: block; font-size: 12px; color: #AAAAB3">{{r.meta}}</span></span>
+        <button aria-label="Options" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; color: #AAAAB3; display: grid; place-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="12" cy="19" r="1.7"></circle></svg></button>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const v = (a) => 'flex: 0 0 auto; width: 80px; height: 45px; border-radius: 8px; background: radial-gradient(90% 80% at 30% 25%, ' + a + ' 0%, rgba(0,0,0,0) 55%), linear-gradient(170deg, #1F2430, #0B0D12)';
+    const rows = [
+      ['Family Trip – Lisbon 2025.mov', 'Video · 18:32', v('#FFD166')],
+      ['Lecture 07 – Signals and Systems.mkv', 'Video · 1:22:10', v('#5C7CFA')],
+      ['Midnight Drive.flac', 'Audio · 4:51', 'flex: 0 0 auto; width: 80px; height: 45px; border-radius: 8px; background: radial-gradient(circle at 60% 40%, #FF6A28 0%, #B8301A 30%, #2A0E18 70%)'],
+      ['Ocean Ambience.ogg', 'Audio · 58:00', 'flex: 0 0 auto; width: 80px; height: 45px; border-radius: 8px; background: linear-gradient(135deg, #1C7C8C, #0B1A22)'],
+      ['Drone – Coastline.mp4', 'Video · 6:14', v('#4DABF7')],
+      ['Concert Recording.mkv', 'Video · 48:20', v('#E8590C')],
+      ['Rain on the Window.wav', 'Audio · 12:00', 'flex: 0 0 auto; width: 80px; height: 45px; border-radius: 8px; background: linear-gradient(135deg, #3B5BDB, #14182A)']
+    ];
+    return { rows: rows.map(([title, meta, thumb]) => ({ title: title, meta: meta, thumb: thumb })) };
+  }
+}
+</script>
+</body>
+</html>
