@@ -17,6 +17,7 @@ Item {
     readonly property bool wide: width >= 1180
     signal play(var urls, int start)
     signal toast(string message)
+    signal showDetails(url url)
 
     function select(id) { selectedId = id; if (compact) phoneDetail = true }
     function ensureSelection() {
@@ -136,6 +137,7 @@ Item {
         property int index: -1
         property url url
         PulseMenuItem { text: qsTr("Play from Here"); iconName: "play"; onTriggered: root.play(Playlists.urls(root.selectedId), trackMenu.index) }
+        PulseMenuItem { text: qsTr("Details"); iconName: "info"; enabled: trackMenu.url.toString().startsWith("file:"); onTriggered: root.showDetails(trackMenu.url) }
         PulseMenuItem { text: qsTr("Move Up"); iconName: "chevron-left"; enabled: trackMenu.index > 0; onTriggered: Playlists.moveItem(root.selectedId, trackMenu.index, trackMenu.index - 1) }
         PulseMenuItem { text: qsTr("Move Down"); iconName: "chevron-right"; enabled: trackMenu.index < root.tracks.length - 1; onTriggered: Playlists.moveItem(root.selectedId, trackMenu.index, trackMenu.index + 1) }
         PulseMenuItem { text: qsTr("Show in Folder"); iconName: "folder"; enabled: trackMenu.url.toString().startsWith("file:"); onTriggered: Qt.openUrlExternally(MediaInput.folderOf(trackMenu.url)) }

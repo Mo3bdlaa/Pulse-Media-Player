@@ -3,6 +3,7 @@
 
 #include "app/convertqueue.hpp"
 #include "engine/engine.hpp"
+#include "engine/mediainspector.hpp"
 #include "engine/mediaprobe.hpp"
 #include "engine/player.hpp"
 #include "engine/transcoder.hpp"
@@ -131,6 +132,27 @@ private slots:
         QVERIFY(info.value(QStringLiteral("durationMs")).toLongLong() > 2500);
         QVERIFY(!info.value(QStringLiteral("hasVideo")).toBool());
         QVERIFY(!info.value(QStringLiteral("audioCodec")).toString().isEmpty());
+    }
+
+    void inspectsTracksAndFile()
+    {
+        MediaInspector inspector;
+        inspector.setUrl(m_wav);
+        QVERIFY(inspector.isLoading());
+        QTRY_VERIFY_WITH_TIMEOUT(!inspector.isLoading(), 10000);
+        const QVariantMap d = inspector.details();
+        QCOMPARE(d.value(QStringLiteral("fileName")).toString(), QStringLiteral("tone.wav"));
+        QCOMPARE(d.value(QStringLiteral("container")).toString(), QStringLiteral("WAVE"));
+        QVERIFY(d.value(QStringLiteral("durationMs")).toLongLong() > 2500);
+        const QVariantList audio = d.value(QStringLiteral("audio")).toList();
+        QCOMPARE(audio.size(), 1);
+        QCOMPARE(audio.first().toMap().value(QStringLiteral("sampleRate")).toInt(), 8000);
+        QVERIFY(d.value(QStringLiteral("video")).toList().isEmpty());
+        // A second visit is served from the cache.
+        inspector.setUrl(QUrl());
+        inspector.setUrl(m_wav);
+        QVERIFY(!inspector.isLoading());
+        QCOMPARE(inspector.details().value(QStringLiteral("fileName")).toString(), QStringLiteral("tone.wav"));
     }
 
     void convertsAudioAndPlaysTheResult_data()

@@ -4,6 +4,7 @@
 #include <QAbstractListModel>
 #include <QDateTime>
 #include <QUrl>
+#include <QVariantMap>
 #include <QVector>
 
 namespace pulse {
@@ -33,6 +34,8 @@ public:
     /// Started but unfinished local files, most recent first:
     /// [{url, title, position, length, progress, isAudio}]
     Q_INVOKABLE QVariantList continueWatching(int limit) const;
+    /// {lastPlayed, playCount, position, length}, or empty when never played here.
+    Q_INVOKABLE QVariantMap history(const QUrl &url) const;
     int revision() const { return m_revision; }
 
 public slots:
@@ -53,6 +56,7 @@ private:
         qint64 position = 0;
         qint64 length = 0;
         QDateTime when;
+        int plays = 1;
     };
     int find(const QUrl &url) const;
     void load();

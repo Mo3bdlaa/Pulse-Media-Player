@@ -20,6 +20,7 @@ pkg_check_modules(LIBVLC REQUIRED IMPORTED_TARGET libvlc>=4.0.0)
 add_library(pulse_engine STATIC
     src/engine/engine.cpp src/engine/engine.hpp
     src/engine/player.cpp src/engine/player.hpp
+    src/engine/mediainspector.cpp src/engine/mediainspector.hpp
     src/engine/mediaprobe.cpp src/engine/mediaprobe.hpp
     src/engine/thumbnailer.cpp src/engine/thumbnailer.hpp
     src/engine/transcoder.cpp src/engine/transcoder.hpp
@@ -72,7 +73,7 @@ if(NOT ANDROID AND NOT IOS)
     install(TARGETS pulse-convert RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
-set_source_files_properties(qml/theme/Theme.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+set_source_files_properties(qml/theme/Theme.qml qml/details/MediaFormat.qml PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
 file(GLOB PULSE_ICONS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS assets/icons/*.svg)
 file(GLOB PULSE_FONTS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} CONFIGURE_DEPENDS assets/fonts/*.ttf)
@@ -125,11 +126,16 @@ qt_add_qml_module(pulse
         qml/screens/ConvertScreen.qml
         qml/screens/HomeScreen.qml
         qml/screens/LibraryScreen.qml
+        qml/screens/MediaDetailsScreen.qml
         qml/screens/NetworkScreen.qml
         qml/screens/PlannedScreen.qml
         qml/screens/PlaylistsScreen.qml
         qml/screens/QueueScreen.qml
         qml/screens/SettingsScreen.qml
+        qml/details/DetailCard.qml
+        qml/details/FactRow.qml
+        qml/details/MediaFormat.qml
+        qml/details/TrackRow.qml
         qml/library/EmptyLibrary.qml
         qml/library/LibraryOverview.qml
         qml/library/LibraryRow.qml
@@ -141,6 +147,7 @@ qt_add_qml_module(pulse
         qml/convert/JobRow.qml
         qml/convert/PresetTile.qml
         qml/convert/QueueCard.qml
+        qml/player/NowPlayingPanel.qml
         qml/player/PlayerScreen.qml
         qml/player/QueueList.qml
         qml/player/Timeline.qml

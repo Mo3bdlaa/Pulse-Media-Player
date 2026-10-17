@@ -17,7 +17,7 @@
 └───────────────┬────────────────────────────────────────────────────────────┘
 ┌───────────────▼────────── engine adapter (src/engine) ─────────────────────┐
 │ Engine (libvlc_instance) · Player (libvlc_media_player) · VideoOutput (GL) │
-│ ThumbnailProvider · MediaProbe (parser) · Transcoder (stream output)       │
+│ ThumbnailProvider · MediaProbe · MediaInspector · Transcoder               │
 │ the only code that includes <vlc/vlc.h>                                    │
 └───────────────┬────────────────────────────────────────────────────────────┘
                 │ public libVLC 4 API
@@ -48,6 +48,12 @@
   from the core's thumbnailer and parser, cached on disk.
 * **`MediaProbe`** parses local files in the background (duration, size,
   codecs, tags) for the Library and Playlists.
+* **`MediaInspector`** gathers everything about one file for Media Details
+  (07) and Now Playing (12): tags, every video, audio and subtitle track, and
+  chapters. Chapters are not part of the parser's results, so the inspector
+  briefly opens the file paused, decoding one frame into a 16×16 scratch
+  buffer, reads the chapter list and closes it again. Results are cached per
+  file.
 * **`Transcoder`** converts one file through the core's stream output
   (`#transcode{…}:std{…}`). It takes a plain `TranscodeProfile`; the chain
   syntax stays inside the adapter.

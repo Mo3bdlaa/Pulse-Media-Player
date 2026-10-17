@@ -16,6 +16,7 @@ Item {
     signal enqueue(var urls)
     signal addToPlaylist(var urls)
     signal convert(var urls)
+    signal showDetails(url url)
 
     readonly property var categories: [
         { value: "all", text: qsTr("All"), name: qsTr("All Media"), icon: "library" },
@@ -51,6 +52,7 @@ Item {
         property url url
         property bool isAudio: false
         PulseMenuItem { text: qsTr("Play"); iconName: "play"; onTriggered: root.play([itemMenu.url], 0) }
+        PulseMenuItem { text: qsTr("Details"); iconName: "info"; onTriggered: root.showDetails(itemMenu.url) }
         PulseMenuItem { text: qsTr("Add to Queue"); iconName: "queue"; onTriggered: root.enqueue([itemMenu.url]) }
         PulseMenuItem { text: qsTr("Add to Playlist…"); iconName: "playlists"; onTriggered: root.addToPlaylist([itemMenu.url]) }
         PulseMenuItem { text: qsTr("Convert…"); iconName: "convert"; onTriggered: root.convert([itemMenu.url]) }

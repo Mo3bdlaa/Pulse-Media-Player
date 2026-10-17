@@ -6,7 +6,8 @@ import Qt5Compat.GraphicalEffects
 import Pulse
 import Pulse.Core
 
-// 02 — Video Player (immersive) and 03 — Audio Player (inside the app shell).
+// 02 — Video Player (immersive), 12 — Now Playing (video inside the app shell
+// with info, chapters, tracks and Up Next) and 03 — Audio Player.
 Rectangle {
     id: root
     property var window
@@ -15,17 +16,21 @@ Rectangle {
     property bool toolsOpen: false
     property bool queueOpen: false
     property string toolsTab: "video"
+    property bool expanded: false
     readonly property bool videoMode: Player.hasVideo
+    readonly property bool theatre: videoMode && expanded
+    readonly property real theatreHeight: compact ? width * 9 / 16 : Math.max(320, Math.min(height * 0.6, width * 9 / 16))
     readonly property bool pinned: toolsOpen || queueOpen || bottomHover.hovered || topHover.hovered
                                    || bottomBar.activeFocus || !Player.playing
-    readonly property bool controlsVisible: !videoMode || pinned || hideTimer.running
+    readonly property bool controlsVisible: !videoMode || theatre || pinned || hideTimer.running
     readonly property var videoTrack: Player.videoTracks.length ? Player.videoTracks[0] : null
 
     signal back()
     signal toggleFullscreen()
     signal toast(string message)
+    signal showDetails(url url)
 
-    color: videoMode ? "black" : "transparent"
+    color: videoMode && !theatre ? "black" : "transparent"
 
     function wake() { hideTimer.restart() }
     function openTools(tab) { toolsTab = tab || toolsTab; queueOpen = false; toolsOpen = true; wake() }
@@ -48,8 +53,12 @@ Rectangle {
     // ============================================================ VIDEO
     Item {
         id: stage
-        anchors.fill: parent
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        height: root.theatre ? root.theatreHeight : parent.height
         visible: root.videoMode
+        clip: true
 
         VideoOutput {
             anchors.fill: parent
@@ -74,8 +83,9 @@ Rectangle {
     Item {
         id: topBar
         visible: root.videoMode && opacity > 0
-        anchors.left: parent.left
-        anchors.right: parent.right
+        anchors.left: stage.left
+        anchors.right: stage.right
+        anchors.top: stage.top
         height: root.compact ? 72 : 110
         opacity: root.controlsVisible ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: Prefs.reduceMotion ? 0 : Theme.motionControlsFade } }
@@ -88,7 +98,7 @@ Rectangle {
             }
         }
         DragHandler {
-            enabled: root.window && !root.fullscreen && !root.compact
+            enabled: root.window && !root.fullscreen && !root.compact && !root.theatre
             target: null
             onActiveChanged: if (active) root.window.startSystemMove()
         }
@@ -102,10 +112,10 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
                 spacing: 6
-                Label { Layout.fillWidth: true; text: Player.title; font.pixelSize: root.compact ? 17 : 27; font.weight: Font.Bold; style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.35) }
+                Label { Layout.fillWidth: true; text: root.theatre ? qsTr("Now Playing") : Player.title; font.pixelSize: root.theatre ? 18 : root.compact ? 17 : 27; font.weight: root.theatre ? Font.DemiBold : Font.Bold; style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.35) }
                 Label {
                     Layout.fillWidth: true
-                    visible: !root.compact
+                    visible: !root.compact && !root.theatre
                     color: Theme.textEmphasis
                     font.pixelSize: 14
                     text: [MediaInput.describe(Player.url).split(" · ")[0],
@@ -114,10 +124,16 @@ Rectangle {
                 }
             }
             IconButton { Layout.alignment: Qt.AlignTop; iconName: "camera"; label: qsTr("Take screenshot"); variant: "overlay"; onClicked: root.snapshot() }
-            IconButton { Layout.alignment: Qt.AlignTop; iconName: "info"; label: qsTr("Media information"); variant: "overlay"; onClicked: root.openTools("info") }
+            IconButton {
+                Layout.alignment: Qt.AlignTop
+                iconName: root.theatre ? "maximize" : "info"
+                label: root.theatre ? qsTr("Back to the full picture") : qsTr("Now Playing details")
+                variant: "overlay"
+                onClicked: { root.closePanels(); root.expanded = !root.expanded }
+            }
             Row {
                 Layout.alignment: Qt.AlignTop
-                visible: root.window && root.window.customFrame && !root.fullscreen
+                visible: root.window && root.window.customFrame && !root.fullscreen && !root.theatre
                 spacing: 4
                 IconButton { iconName: "minimize"; label: qsTr("Minimize"); variant: "overlay"; iconSize: 16; onClicked: root.window.showMinimized() }
                 IconButton { iconName: "close"; label: qsTr("Close"); variant: "overlay"; iconSize: 16; onClicked: root.window.close() }
@@ -129,9 +145,9 @@ Rectangle {
     FocusScope {
         id: bottomBar
         visible: root.videoMode && opacity > 0
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
+        anchors.left: stage.left
+        anchors.right: stage.right
+        anchors.bottom: stage.bottom
         height: (root.compact ? 150 : 210) + timeline.implicitHeight - 28
         opacity: root.controlsVisible ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: Prefs.reduceMotion ? 0 : Theme.motionControlsFade } }
@@ -154,7 +170,7 @@ Rectangle {
             anchors.bottomMargin: root.compact ? 12 : 24
             spacing: 4
             Item { Layout.fillHeight: true }
-            Timeline { id: timeline; Layout.fillWidth: true; chapterLabels: !root.compact }
+            Timeline { id: timeline; Layout.fillWidth: true; chapterLabels: !root.compact && !root.theatre }
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 10
@@ -226,6 +242,48 @@ Rectangle {
                 }
             }
         }
+    }
+
+    // 12 — title over the picture, and the panel underneath.
+    Column {
+        visible: root.theatre && !root.compact && stage.height > 400
+        anchors.left: stage.left
+        anchors.leftMargin: 32
+        anchors.bottom: bottomBar.top
+        anchors.bottomMargin: -20
+        width: Math.min(620, stage.width * 0.55)
+        spacing: 8
+        Label { width: parent.width; text: npPanel.title; font.pixelSize: 44; font.weight: Font.ExtraBold; font.letterSpacing: -0.8; style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.4) }
+        Label {
+            width: parent.width
+            color: Theme.textEmphasis
+            font.pixelSize: 15
+            text: [npPanel.year > 0 ? String(npPanel.year) : "", MediaFormat.runtime(Player.length),
+                   root.videoTrack ? MediaFormat.shortQuality(root.videoTrack.width, root.videoTrack.height) : "",
+                   npPanel.a ? MediaFormat.channels(npPanel.a.channels) : ""].filter(s => s).join("   ·   ")
+        }
+        Label {
+            width: parent.width
+            visible: text !== ""
+            text: npInspector.details.description || ""
+            color: Theme.textEmphasis
+            font.pixelSize: 14
+            lineHeight: 1.3
+            wrapMode: Text.WordWrap
+            maximumLineCount: 3
+        }
+    }
+    MediaInspector { id: npInspector; url: root.theatre ? Player.url : "" }
+    NowPlayingPanel {
+        id: npPanel
+        visible: root.theatre
+        anchors.top: stage.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        compact: root.compact
+        inspector: npInspector
+        onShowDetails: (u) => root.showDetails(u)
     }
 
     // Floating tools card (02): top-right over the video.

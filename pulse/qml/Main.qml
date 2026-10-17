@@ -17,9 +17,12 @@ T.ApplicationWindow {
     readonly property bool fullscreen: visibility === Window.FullScreen
     property string route: "home"
     // Video plays edge to edge; audio keeps the app shell (03).
-    readonly property bool immersive: route === "player" && Player.hasVideo
+    readonly property bool immersive: route === "player" && Player.hasVideo && !playerScreen.expanded
     property string lastRoute: "home"
     property int resumeFrom: 0
+    property double pendingStart: -1   // next playRequested starts here (ms) instead of the resume point
+    property url detailsUrl
+    property string detailsReturn: "library"
 
     width: 1280
     height: 800
@@ -33,7 +36,30 @@ T.ApplicationWindow {
     font.family: Theme.fontFamily
 
     function toggleMaximized() { visibility === Window.Maximized ? showNormal() : showMaximized() }
-    function toggleFullscreen() { fullscreen ? showNormal() : showFullScreen() }
+    function toggleFullscreen() {
+        if (fullscreen) { showNormal(); return }
+        playerScreen.expanded = false
+        showFullScreen()
+    }
+    // 12 — the video inside the app with its details, chapters and Up Next.
+    function showNowPlaying() {
+        playerScreen.expanded = true
+        navigate("player")
+    }
+    // 07 — Media Details for one file.
+    function showDetails(address) {
+        if (!address.toString().startsWith("file:")) return
+        if (route !== "details") detailsReturn = route
+        if (fullscreen) showNormal()
+        detailsUrl = address
+        navigate("details")
+    }
+    function playAt(address, ms) {
+        pendingStart = ms
+        playerScreen.expanded = false
+        Queue.setItems([address], 0)
+        navigate("player")
+    }
 
     function navigate(r) {
         if (r === "player" && !Player.hasMedia) r = "home"
@@ -65,6 +91,7 @@ T.ApplicationWindow {
 
     function playList(urls, start) {
         if (urls.length === 0) return
+        playerScreen.expanded = false
         Queue.setItems(urls, start)
         navigate("player")
     }
@@ -84,11 +111,13 @@ T.ApplicationWindow {
     Connections {
         target: Queue
         function onPlayRequested(address) {
-            const resume = Prefs.resumePlayback ? Recent.resumePosition(address) : 0
+            const chosen = win.pendingStart >= 0
+            const resume = chosen ? win.pendingStart : Prefs.resumePlayback ? Recent.resumePosition(address) : 0
+            win.pendingStart = -1
             win.resumeFrom = resume
             Player.open(address, resume)
             if (Prefs.keepRecent) Recent.touch(address)
-            if (resume > 0)
+            if (resume > 0 && !chosen)
                 toast.show(qsTr("Resumed at %1").arg(MediaInput.formatTime(resume)), qsTr("Start over"))
         }
     }
@@ -144,7 +173,7 @@ T.ApplicationWindow {
             { text: qsTr("Open folder…"), hint: "Ctrl F", icon: "folder", run: () => folderDialog.open() },
             { text: qsTr("Open network address…"), hint: "Ctrl N", icon: "link", run: () => urlDialog.open() },
             { text: qsTr("Go to Home"), icon: "home", run: () => win.navigate("home") },
-            { text: qsTr("Go to Now Playing"), icon: "music", run: () => win.navigate("player") },
+            { text: qsTr("Go to Now Playing"), icon: "music", run: () => win.showNowPlaying() },
             { text: qsTr("Show queue"), icon: "queue", run: () => win.navigate("queue") },
             { text: qsTr("Library"), icon: "library", run: () => win.navigate("library") },
             { text: qsTr("Playlists"), icon: "playlists", run: () => win.navigate("playlists") },
@@ -204,7 +233,7 @@ T.ApplicationWindow {
                 visible: !win.compact && !win.immersive
                 route: win.route
                 hasMedia: Player.hasMedia
-                onNavigate: (r) => win.navigate(r)
+                onNavigate: (r) => r === "player" ? win.showNowPlaying() : win.navigate(r)
             }
 
             Item {
@@ -232,6 +261,18 @@ T.ApplicationWindow {
                     onEnqueue: (urls) => win.openUrls(urls, true)
                     onAddToPlaylist: (urls) => picker.pick(urls)
                     onConvert: (urls) => win.convertUrls(urls)
+                    onShowDetails: (address) => win.showDetails(address)
+                }
+                MediaDetailsScreen {
+                    anchors.fill: parent
+                    visible: win.route === "details"
+                    compact: win.compact
+                    url: win.detailsUrl
+                    onBack: win.navigate(win.detailsReturn)
+                    onPlayAt: (address, ms) => win.playAt(address, ms)
+                    onEnqueue: (urls) => win.openUrls(urls, true)
+                    onAddToPlaylist: (urls) => picker.pick(urls)
+                    onConvert: (urls) => win.convertUrls(urls)
                 }
                 PlaylistsScreen {
                     id: playlistsScreen
@@ -240,6 +281,7 @@ T.ApplicationWindow {
                     compact: win.compact
                     onPlay: (urls, start) => win.playList(urls, start)
                     onToast: (m) => toast.show(m)
+                    onShowDetails: (address) => win.showDetails(address)
                 }
                 ConvertScreen {
                     id: convertScreen
@@ -260,6 +302,7 @@ T.ApplicationWindow {
                     onBack: { if (win.fullscreen) win.showNormal(); win.navigate(win.lastRoute === "player" ? "home" : win.lastRoute) }
                     onToggleFullscreen: win.toggleFullscreen()
                     onToast: (m) => toast.show(m)
+                    onShowDetails: (address) => win.showDetails(address)
                 }
             }
         }

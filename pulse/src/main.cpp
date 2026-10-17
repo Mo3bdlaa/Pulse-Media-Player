@@ -10,6 +10,7 @@
 #include "app/preferences.hpp"
 #include "app/recentmedia.hpp"
 #include "engine/engine.hpp"
+#include "engine/mediainspector.hpp"
 #include "engine/mediaprobe.hpp"
 #include "engine/player.hpp"
 #include "engine/thumbnailer.hpp"
@@ -95,6 +96,7 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonInstance(uri, 1, 0, "Converter", &converter);
     qmlRegisterUncreatableType<pulse::ConvertJobs>(uri, 1, 0, "ConvertJobs", QStringLiteral("Owned by Converter"));
     qmlRegisterType<pulse::VideoOutput>(uri, 1, 0, "VideoOutput");
+    qmlRegisterType<pulse::MediaInspector>(uri, 1, 0, "MediaInspector");
 
     QQmlApplicationEngine qml;
     qml.addImageProvider(QStringLiteral("icon"), new pulse::IconProvider);

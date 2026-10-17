@@ -22,6 +22,16 @@ RecentMedia::RecentMedia(QObject *parent)
     connect(this, &QAbstractItemModel::rowsMoved, this, bump);
 }
 
+QVariantMap RecentMedia::history(const QUrl &url) const
+{
+    const int i = find(url);
+    if (i < 0)
+        return {};
+    const Entry &e = m_entries[i];
+    return { { QStringLiteral("lastPlayed"), e.when }, { QStringLiteral("playCount"), e.plays },
+             { QStringLiteral("position"), e.position }, { QStringLiteral("length"), e.length } };
+}
+
 QVariantList RecentMedia::continueWatching(int limit) const
 {
     QVariantList out;
@@ -104,11 +114,12 @@ void RecentMedia::touch(const QUrl &url)
 {
     if (!m_enabled || url.isEmpty())
         return;
-    Entry entry{ url, 0, 0, QDateTime::currentDateTime() };
+    Entry entry{ url, 0, 0, QDateTime::currentDateTime(), 1 };
     const int i = find(url);
     if (i >= 0) {
         entry.position = m_entries[i].position;
         entry.length = m_entries[i].length;
+        entry.plays = m_entries[i].plays + 1;
         beginRemoveRows({}, i, i);
         m_entries.removeAt(i);
         endRemoveRows();
@@ -175,6 +186,7 @@ void RecentMedia::load()
         e.position = s.value(QStringLiteral("position")).toLongLong();
         e.length = s.value(QStringLiteral("length")).toLongLong();
         e.when = s.value(QStringLiteral("when")).toDateTime();
+        e.plays = s.value(QStringLiteral("plays"), 1).toInt();
         if (!e.url.isEmpty())
             m_entries.push_back(e);
     }
@@ -192,6 +204,7 @@ void RecentMedia::save() const
         s.setValue(QStringLiteral("position"), m_entries[i].position);
         s.setValue(QStringLiteral("length"), m_entries[i].length);
         s.setValue(QStringLiteral("when"), m_entries[i].when);
+        s.setValue(QStringLiteral("plays"), m_entries[i].plays);
     }
     s.endArray();
 }
