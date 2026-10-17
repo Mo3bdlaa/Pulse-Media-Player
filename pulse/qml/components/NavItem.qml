@@ -2,14 +2,14 @@ import QtQuick
 import QtQuick.Controls.Basic as T
 import Pulse
 
-// Sidebar destination. Selected = raised fill + accent bar + weight (not colour alone).
+// Sidebar destination. Selected: ember gradient + bloom + bold (01 Home).
 T.ItemDelegate {
     id: control
     property string iconName
     property bool selected: false
 
     implicitHeight: Theme.navItem
-    implicitWidth: 200
+    implicitWidth: 150
     leftPadding: 14
     focusPolicy: Qt.StrongFocus
     Accessible.role: Accessible.PageTab
@@ -21,26 +21,33 @@ T.ItemDelegate {
         PulseIcon {
             anchors.verticalCenter: parent.verticalCenter
             name: control.iconName
-            color: control.selected ? Theme.accent : (control.hovered ? Theme.text : Theme.textSecondary)
+            color: control.selected ? Theme.textOnAccent : (control.hovered ? Theme.text : Theme.textSecondary)
         }
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: control.text
-            color: control.selected || control.hovered ? Theme.text : Theme.textSecondary
+            color: control.selected ? Theme.textOnAccent : control.hovered ? Theme.text : Theme.textEmphasis
             font.family: Theme.fontFamily
             font.pixelSize: 14
-            font.weight: control.selected ? Font.DemiBold : Font.Medium
+            font.weight: control.selected ? Font.Bold : Font.Medium
         }
     }
     background: Rectangle {
-        radius: Theme.radiusControl
-        color: control.selected ? Theme.surfaceRaised : control.hovered ? Qt.rgba(1, 1, 1, 0.05) : "transparent"
+        radius: 10
+        color: control.hovered ? Qt.rgba(1, 1, 1, 0.05) : "transparent"
         Rectangle {
+            id: fill
+            anchors.fill: parent
+            radius: 10
             visible: control.selected
-            width: 3
-            height: parent.height
-            radius: 1.5
-            color: Theme.accent
+            gradient: Gradient {
+                orientation: Gradient.Horizontal
+                GradientStop { position: 0.0; color: Theme.accentBright }
+                GradientStop { position: 1.0; color: Theme.accentDeep }
+            }
+            border.width: 1
+            border.color: Qt.rgba(1, 0.8, 0.6, 0.35)
+            AccentGlow { strength: 0.7 }
         }
         FocusRing { target: control }
     }

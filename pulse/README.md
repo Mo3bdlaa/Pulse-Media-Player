@@ -35,8 +35,9 @@ Pulse-Media-Player/
 
 ## Build (Linux, desktop development)
 
-Requirements: Qt ≥ 6.4 (Quick, QuickControls2, Svg, OpenGL), CMake ≥ 3.21,
-Ninja, meson ≥ 1.10, and the FFmpeg development libraries.
+Requirements: Qt ≥ 6.4 (Quick, QuickControls2, Svg, OpenGL, plus the Qt5Compat
+GraphicalEffects and QtQuick.Particles QML modules), CMake ≥ 3.21,
+Ninja, meson ≥ 1.10, and the FFmpeg and TagLib development libraries.
 
 ```sh
 # 1. Build libVLC from this repository's upstream sources (no patches).

@@ -7,12 +7,14 @@ Rectangle {
     id: root
     property var model: []
     property var value
-    property bool accentSelection: false
+    property bool accentSelection: true
     signal activated(var value)
 
     implicitHeight: 40
     radius: 10
-    color: Theme.sunken
+    color: Qt.rgba(0.04, 0.04, 0.05, 0.6)
+    border.width: 1
+    border.color: Theme.glassBorder
     Accessible.role: Accessible.RadioButton
 
     Row {
@@ -34,14 +36,14 @@ Rectangle {
                 onClicked: root.activated(modelData.value)
                 background: Rectangle {
                     radius: 8
-                    color: seg.on ? (root.accentSelection ? Theme.accent : Theme.surfaceRaised) : "transparent"
+                    color: seg.on ? (root.accentSelection ? Theme.accent : Theme.surfaceRaised) : seg.hovered ? Qt.rgba(1, 1, 1, 0.05) : "transparent"
                     FocusRing { target: seg; radius_: 8 }
                 }
                 contentItem: Text {
                     text: seg.modelData.text
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
-                    color: seg.on ? (root.accentSelection ? Theme.textOnAccent : Theme.text) : Theme.textSecondary
+                    color: seg.on ? (root.accentSelection ? Theme.textOnAccent : Theme.text) : Theme.textEmphasis
                     font.family: Theme.fontFamily
                     font.pixelSize: 13
                     font.weight: seg.on ? Font.Bold : Font.DemiBold

@@ -11,18 +11,19 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: root.compact ? 16 : 40
-        anchors.topMargin: root.compact ? 16 : 32
-        spacing: 20
+        spacing: 16
 
+        PageBanner {
+            Layout.fillWidth: true
+            compact: root.compact
+            title: qsTr("Playback Queue")
+            subtitle: (Queue.count === 1 ? qsTr("1 item") : qsTr("%1 items").arg(Queue.count))
+        }
         Flow {
             Layout.fillWidth: true
+            Layout.leftMargin: root.compact ? 16 : 36
+            Layout.rightMargin: Layout.leftMargin
             spacing: 16
-            ColumnLayout {
-                width: Math.min(implicitWidth, root.width)
-                Label { role: "title"; text: qsTr("Playback Queue"); Accessible.role: Accessible.Heading }
-                Label { role: "body"; secondary: true; text: qsTr("%n item(s)", "", Queue.count) }
-            }
             Row {
                 spacing: 8
                 PulseButton {
@@ -40,8 +41,15 @@ Item {
                 PulseButton { text: qsTr("Clear queue"); variant: "quiet"; implicitHeight: 40; enabled: Queue.count > 0; onClicked: Queue.clear() }
             }
         }
-        QueueList { Layout.fillWidth: true; Layout.fillHeight: true }
-        Label { Layout.fillWidth: true; role: "meta"; secondary: true; wrapMode: Text.WordWrap; elide: Text.ElideNone
+        Glass {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.leftMargin: root.compact ? 8 : 36
+            Layout.rightMargin: Layout.leftMargin
+            radius: 16
+            QueueList { anchors.fill: parent; anchors.margins: 10 }
+        }
+        Label { Layout.fillWidth: true; Layout.leftMargin: root.compact ? 16 : 36; Layout.bottomMargin: 16; role: "meta"; secondary: true; wrapMode: Text.WordWrap; elide: Text.ElideNone
             text: qsTr("Clearing or removing items never deletes files. Press Alt + ↑/↓ to reorder, Delete to remove.") }
     }
 }

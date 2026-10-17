@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls.Basic as T
 import QtQuick.Layouts
-import QtQuick.Shapes
+import Qt5Compat.GraphicalEffects
 import Pulse
 import Pulse.Core
 
@@ -9,6 +9,7 @@ import Pulse.Core
 T.ScrollView {
     id: root
     property bool compact: false
+    readonly property int pad: compact ? 16 : 36
     signal openFile()
     signal openFolder()
     signal openUrl()
@@ -18,65 +19,78 @@ T.ScrollView {
     contentWidth: availableWidth
     T.ScrollBar.horizontal.policy: T.ScrollBar.AlwaysOff
 
-    // Brand glow: the one decorative moment, top-right; matte elsewhere.
-    Shape {
+    HeroScene {
         width: root.availableWidth
-        height: 520
-                ShapePath {
-            strokeWidth: -1
-            fillGradient: RadialGradient {
-                centerX: root.availableWidth * 0.92; centerY: -40
-                centerRadius: 620
-                focalX: centerX; focalY: centerY
-                GradientStop { position: 0; color: Qt.rgba(1, 0.416, 0.157, 0.16) }
-                GradientStop { position: 1; color: "transparent" }
-            }
-            startX: 0; startY: 0
-            PathLine { x: root.availableWidth; y: 0 }
-            PathLine { x: root.availableWidth; y: 520 }
-            PathLine { x: 0; y: 520 }
-            PathLine { x: 0; y: 0 }
-        }
+        height: root.compact ? 300 : 330
+        planetX: width * (root.compact ? 0.9 : 0.82)
+        planetY: root.compact ? 18 : 92
+        planetR: root.compact ? 44 : Math.min(112, width * 0.09)
+        horizon: root.compact ? 200 : 214
     }
 
     ColumnLayout {
         width: root.availableWidth
-        spacing: Theme.spaceXL + 8
+        spacing: root.compact ? 20 : 26
 
+        // Hero copy.
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.leftMargin: root.compact ? 16 : 40
-            Layout.rightMargin: Layout.leftMargin
-            Layout.topMargin: root.compact ? 16 : 32
-            spacing: 10
-            Text {
-                Layout.fillWidth: true
-                textFormat: Text.StyledText
-                text: qsTr("Play anything") + " <font color='" + Theme.accent + "'>" + qsTr("instantly.") + "</font>"
-                color: Theme.text
-                font.family: Theme.fontFamily
-                font.pixelSize: root.compact ? Theme.displaySizeCompact : Theme.displaySize
-                font.weight: Font.ExtraBold
-                font.letterSpacing: root.compact ? -0.6 : -0.88
-                wrapMode: Text.WordWrap
+            Layout.leftMargin: root.pad
+            Layout.rightMargin: root.pad
+            Layout.topMargin: root.compact ? 12 : 34
+            spacing: 12
+            Row {
+                spacing: 14
+                Text {
+                    id: lead
+                    text: qsTr("Play anything")
+                    color: Theme.text
+                    font.family: Theme.fontFamily
+                    font.pixelSize: root.compact ? Theme.displaySizeCompact : 46
+                    font.weight: Font.ExtraBold
+                    font.letterSpacing: -0.9
+                }
+                Item {
+                    width: accentWord.implicitWidth
+                    height: accentWord.implicitHeight
+                    Text {
+                        id: accentWord
+                        visible: false
+                        text: qsTr("instantly.")
+                        font: lead.font
+                    }
+                    LinearGradient {
+                        anchors.fill: parent
+                        source: accentWord
+                        start: Qt.point(0, 0)
+                        end: Qt.point(width, height)
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: Theme.accentBright }
+                            GradientStop { position: 0.6; color: "#FF9A3A" }
+                            GradientStop { position: 1.0; color: Theme.highlight }
+                        }
+                    }
+                }
                 Accessible.role: Accessible.Heading
                 Accessible.name: qsTr("Play anything instantly.")
             }
             Label {
                 Layout.fillWidth: true
-                Layout.maximumWidth: 560
-                secondary: true
-                font.pixelSize: 16
+                Layout.maximumWidth: 520
+                color: Theme.textEmphasis
+                font.pixelSize: 17
+                lineHeight: 1.2
                 wrapMode: Text.WordWrap
                 elide: Text.ElideNone
-                text: qsTr("Open a file, a folder or a stream and start watching or listening in seconds. No library setup, no account, no waiting.")
+                text: qsTr("Open a file, folder, or stream and start watching or listening in seconds. No library setup. No waiting.")
             }
         }
 
         GridLayout {
             Layout.fillWidth: true
-            Layout.leftMargin: root.compact ? 16 : 40
-            Layout.rightMargin: Layout.leftMargin
+            Layout.leftMargin: root.pad
+            Layout.rightMargin: root.pad
+            Layout.maximumWidth: 960 + 2 * root.pad
             columns: root.compact ? 2 : 3
             columnSpacing: root.compact ? 10 : 16
             rowSpacing: 10
@@ -84,148 +98,215 @@ T.ScrollView {
             PulseButton {
                 Layout.fillWidth: true
                 Layout.columnSpan: root.compact ? 2 : 1
-                variant: "primary"; large: true; iconName: "file-play"
+                variant: "primary"; iconName: "file-play"
                 text: qsTr("Open File")
-                description: root.compact ? "" : qsTr("Video, audio or subtitles")
-                shortcutHint: root.compact ? "" : "Ctrl O"
+                description: root.compact ? "" : qsTr("Video, Audio, Subtitles")
+                large: root.compact
                 onClicked: root.openFile()
             }
-            PulseButton { Layout.fillWidth: true; large: true; iconName: "folder"; text: root.compact ? qsTr("Folder") : qsTr("Open Folder"); description: root.compact ? "" : qsTr("Plays everything inside as a queue"); shortcutHint: root.compact ? "" : "Ctrl F"; onClicked: root.openFolder() }
-            PulseButton { Layout.fillWidth: true; large: true; iconName: "link"; text: root.compact ? qsTr("URL") : qsTr("Open URL"); description: root.compact ? "" : qsTr("HTTP, HLS, RTSP and more"); shortcutHint: root.compact ? "" : "Ctrl N"; onClicked: root.openUrl() }
+            PulseButton { Layout.fillWidth: true; iconName: "folder"; large: root.compact; text: root.compact ? qsTr("Open Folder") : qsTr("Open Folder"); description: root.compact ? "" : qsTr("Play all media files"); onClicked: root.openFolder() }
+            PulseButton { Layout.fillWidth: true; iconName: "link"; large: root.compact; text: qsTr("Open URL"); description: root.compact ? "" : qsTr("Stream from the web"); onClicked: root.openUrl() }
         }
 
-        // Drop target hint (the whole window accepts drops).
-        Rectangle {
+        // Drop target (the whole window accepts drops).
+        Item {
             visible: !root.compact
             Layout.fillWidth: true
-            Layout.leftMargin: 40
-            Layout.rightMargin: 40
-            implicitHeight: 128
-            radius: Theme.radiusPanel
-            color: "transparent"
-            border.width: 1.5
-            border.color: Theme.border
+            Layout.leftMargin: root.pad
+            Layout.rightMargin: root.pad
+            implicitHeight: 136
+            DashedFrame { anchors.fill: parent; radius: 14 }
             Column {
                 anchors.centerIn: parent
-                spacing: 8
-                Logo { anchors.horizontalCenter: parent.horizontalCenter; wordmark: false; markHeight: 30 }
-                Label { anchors.horizontalCenter: parent.horizontalCenter; text: qsTr("Drop video, audio or subtitle files anywhere in this window"); font.pixelSize: 15; font.weight: Font.DemiBold }
-                Label { anchors.horizontalCenter: parent.horizontalCenter; role: "meta"; secondary: true; font.pixelSize: 13; text: qsTr("Several files start a queue. A subtitle dropped while playing is added to the current video.") }
+                spacing: 10
+                Logo { anchors.horizontalCenter: parent.horizontalCenter; wordmark: false; markHeight: 38 }
+                Label { anchors.horizontalCenter: parent.horizontalCenter; text: qsTr("Drop video, audio, or subtitle files here"); font.pixelSize: 15; font.weight: Font.DemiBold }
+                Label { anchors.horizontalCenter: parent.horizontalCenter; role: "meta"; color: Theme.accentText; font.pixelSize: 13; text: qsTr("or click to open files")
+                    TapHandler { onTapped: root.openFile() } }
             }
         }
 
-        ColumnLayout {
-            Layout.fillWidth: true
-            Layout.leftMargin: root.compact ? 16 : 40
-            Layout.rightMargin: Layout.leftMargin
-            spacing: 16
+        // Recent files.
+        Glass {
             visible: Prefs.keepRecent
+            Layout.fillWidth: true
+            Layout.leftMargin: root.compact ? 0 : root.pad
+            Layout.rightMargin: root.compact ? 0 : root.pad
+            color: root.compact ? "transparent" : Theme.glass
+            border.width: root.compact ? 0 : 1
+            implicitHeight: recentCol.implicitHeight + (root.compact ? 0 : 36)
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 10
-                PulseIcon { name: "clock"; color: Theme.textSecondary }
-                Label { Layout.fillWidth: true; role: "section"; text: qsTr("Recent files"); Accessible.role: Accessible.Heading }
-                PulseButton { visible: Recent.count > 0; variant: "quiet"; text: qsTr("Clear history"); implicitHeight: 36; onClicked: Recent.clear() }
-            }
+            ColumnLayout {
+                id: recentCol
+                anchors.fill: parent
+                anchors.margins: root.compact ? 0 : 18
+                anchors.leftMargin: root.compact ? root.pad : 20
+                anchors.rightMargin: root.compact ? root.pad : 20
+                spacing: 14
 
-            Label {
-                visible: Recent.count === 0
-                secondary: true
-                text: qsTr("Files you open will appear here. They stay on this device.")
-            }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    PulseIcon { name: "clock"; color: Theme.text; size: 20 }
+                    Label { Layout.fillWidth: true; role: "section"; font.pixelSize: 19; text: qsTr("Recent Files"); Accessible.role: Accessible.Heading }
+                    PulseButton { visible: Recent.count > 0; variant: "quiet"; text: qsTr("Clear"); implicitHeight: 34; onClicked: Recent.clear() }
+                }
+                Label {
+                    visible: Recent.count === 0
+                    color: Theme.textSecondary
+                    text: qsTr("Files you open appear here. They stay on this device.")
+                }
+                // Positioner, not a Layout: Qt 6.4 layouts can crash when a
+                // Repeater inside them gains or loses items.
+                Grid {
+                    id: recentGrid
+                    Layout.fillWidth: true
+                    columns: root.compact ? 1 : 4
+                    columnSpacing: 18
+                    rowSpacing: root.compact ? 6 : 18
+                    readonly property real tileWidth: root.compact ? width : (width - 3 * columnSpacing) / 4
+                    Repeater {
+                        model: Recent
+                        delegate: T.AbstractButton {
+                            id: tile
+                            required property int index
+                            required property url url
+                            required property string title
+                            required property string detail
+                            required property real progress
+                            required property bool isAudio
+                            required property bool isStream
+                            required property double length
+                            required property var when
+                            visible: index < (root.compact ? 5 : 4)
+                            readonly property real tileWidth: recentGrid.tileWidth
+                            width: tileWidth
+                            height: visible ? (root.compact ? 78 : Math.round(tileWidth * 9 / 16) + 58) : 0
+                            Accessible.name: (progress > 0 ? qsTr("Resume %1") : qsTr("Play %1")).arg(title)
+                            onClicked: root.playRecent(url)
+                            background: Item { FocusRing { target: tile; radius_: 10 } }
 
-            GridLayout {
-                Layout.fillWidth: true
-                columns: root.compact ? 1 : Math.max(2, Math.min(5, Math.floor(root.availableWidth / 280)))
-                columnSpacing: 16
-                rowSpacing: root.compact ? 4 : 20
-                Repeater {
-                    model: Recent
-                    delegate: T.AbstractButton {
-                        id: tile
-                        required property int index
-                        required property url url
-                        required property string title
-                        required property string detail
-                        required property real progress
-                        required property bool isAudio
-                        required property bool isStream
-                        required property double length
-                        visible: index < (root.compact ? 6 : 8)
-                        Layout.fillWidth: true
-                        implicitHeight: root.compact ? 70 : thumb.height + 54
-                        Accessible.name: (progress > 0 ? qsTr("Resume %1") : qsTr("Play %1")).arg(title)
-                        onClicked: root.playRecent(url)
-                        background: Item { FocusRing { target: tile; radius_: Theme.radiusCard } }
-
-                        MediaThumb {
-                            id: thumb
-                            width: root.compact ? 96 : parent.width
-                            height: root.compact ? 54 : width * 9 / 16
-                            y: root.compact ? 8 : 0
-                            source: tile.url
-                            audio: tile.isAudio
-                            stream: tile.isStream
-                            progress: tile.progress
-                            corner: tile.length > 0 ? MediaInput.formatTime(tile.length) : ""
-                            opacity: tile.hovered ? 0.85 : 1
-                        }
-                        Column {
-                            x: root.compact ? 110 : 0
-                            y: root.compact ? 14 : thumb.height + 10
-                            width: parent.width - x - 36
-                            spacing: 2
-                            Label { width: parent.width; text: tile.title; font.weight: Font.DemiBold }
-                            Label { width: parent.width; role: "meta"; secondary: true; text: tile.detail }
-                        }
-                        IconButton {
-                            anchors.right: parent.right
-                            y: root.compact ? 13 : thumb.height + 6
-                            iconName: "close"; iconSize: 14; size: 32; variant: "tint"
-                            label: qsTr("Remove %1 from recent files").arg(tile.title)
-                            onClicked: Recent.remove(tile.index)
+                            MediaThumb {
+                                id: thumb
+                                width: root.compact ? 112 : parent.width
+                                height: root.compact ? 63 : Math.round(tile.tileWidth * 9 / 16)
+                                y: root.compact ? 7 : 0
+                                source: tile.url
+                                audio: tile.isAudio
+                                stream: tile.isStream
+                                progress: tile.progress
+                                corner: tile.length > 0 ? MediaInput.formatTime(tile.length) : ""
+                                scale: tile.hovered ? 1.02 : 1
+                                Behavior on scale { NumberAnimation { duration: Theme.motionFast } }
+                            }
+                            Column {
+                                x: root.compact ? 126 : 0
+                                y: root.compact ? 16 : thumb.height + 12
+                                width: parent.width - x - 34
+                                spacing: 3
+                                Label { width: parent.width; text: tile.title; font.pixelSize: 14; font.weight: Font.DemiBold }
+                                Label { width: parent.width; role: "meta"; secondary: true; text: tile.detail + " · " + MediaInput.relativeTime(tile.when) }
+                            }
+                            IconButton {
+                                anchors.right: parent.right
+                                anchors.rightMargin: -8
+                                y: root.compact ? 14 : thumb.height + 8
+                                iconName: "more-vertical"; iconSize: 18; size: 36; variant: "tint"
+                                label: qsTr("Options for %1").arg(tile.title)
+                                onClicked: menu.popup()
+                                T.Menu {
+                                    id: menu
+                                    T.MenuItem { text: qsTr("Play"); onTriggered: root.playRecent(tile.url) }
+                                    T.MenuItem { text: qsTr("Remove from recent"); onTriggered: Recent.remove(tile.index) }
+                                }
+                            }
                         }
                     }
                 }
             }
         }
 
-        // Keyboard strip (desktop only).
-        Rectangle {
+        // Quick access.
+        ColumnLayout {
             visible: !root.compact
             Layout.fillWidth: true
-            Layout.leftMargin: 40
-            Layout.rightMargin: 40
-            Layout.bottomMargin: 40
-            implicitHeight: flow.implicitHeight + 32
-            radius: Theme.radiusCard
-            color: Theme.surface
-            border.width: 1
-            border.color: Theme.border
-            Flow {
-                id: flow
-                anchors.fill: parent
-                anchors.margins: 16
-                anchors.leftMargin: 20
-                spacing: 24
-                Row {
-                    spacing: 10
-                    PulseIcon { anchors.verticalCenter: parent.verticalCenter; name: "keyboard"; color: Theme.highlight; size: 22 }
-                    Column {
-                        Label { text: qsTr("Keyboard first"); font.weight: Font.DemiBold }
-                        Label { role: "meta"; secondary: true; text: qsTr("Every control has a shortcut.") }
+            Layout.leftMargin: root.pad
+            Layout.rightMargin: root.pad
+            spacing: 14
+            RowLayout {
+                spacing: 10
+                PulseIcon { name: "zap"; color: Theme.accent; size: 20 }
+                Label { role: "section"; font.pixelSize: 19; text: qsTr("Quick Access") }
+            }
+            GridLayout {
+                Layout.fillWidth: true
+                columns: root.availableWidth > 1150 ? 5 : 3
+                columnSpacing: 14
+                rowSpacing: 14
+                Repeater {
+                    model: [
+                        { r: "library", i: "library", t: qsTr("Library"), d: qsTr("Browse your media") },
+                        { r: "playlists", i: "playlists", t: qsTr("Playlists"), d: qsTr("Create and manage") },
+                        { r: "network", i: "network", t: qsTr("Network Streams"), d: qsTr("Play from URL, TV, NAS") },
+                        { r: "convert", i: "convert", t: qsTr("Convert"), d: qsTr("Change formats") },
+                        { r: "settings", i: "settings", t: qsTr("Settings"), d: qsTr("Customize Pulse") }
+                    ]
+                    delegate: PulseButton {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        iconName: modelData.i
+                        text: modelData.t
+                        description: modelData.d
+                        chevron: true
+                        font.pixelSize: 14
+                        onClicked: root.navigate(modelData.r)
                     }
                 }
-                Repeater {
-                    model: [["Space", qsTr("Play / pause")], ["← →", qsTr("Seek")], ["F", qsTr("Fullscreen")], ["M", qsTr("Mute")], ["V", qsTr("Subtitles")]]
-                    delegate: Row {
-                        required property var modelData
-                        spacing: 8
-                        height: 36
-                        Kbd { anchors.verticalCenter: parent.verticalCenter; text: modelData[0] }
-                        Label { anchors.verticalCenter: parent.verticalCenter; role: "meta"; secondary: true; text: modelData[1] }
+            }
+        }
+
+        // Tips & shortcuts.
+        Glass {
+            visible: !root.compact
+            Layout.fillWidth: true
+            Layout.leftMargin: root.pad
+            Layout.rightMargin: root.pad
+            Layout.bottomMargin: 32
+            implicitHeight: 84
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: 22
+                anchors.rightMargin: 22
+                spacing: 28
+                Row {
+                    spacing: 14
+                    PulseIcon { anchors.verticalCenter: parent.verticalCenter; name: "bulb"; color: Theme.highlight; size: 26 }
+                    Column {
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: 3
+                        Label { text: qsTr("Tips & Shortcuts"); font.weight: Font.DemiBold; font.pixelSize: 15 }
+                        Label { role: "meta"; secondary: true; text: qsTr("Control playback faster with keyboard shortcuts.") }
                     }
+                }
+                Item { Layout.fillWidth: true }
+                Repeater {
+                    model: [["Space", qsTr("Play / Pause")], ["← →", qsTr("Seek")], ["F", qsTr("Fullscreen")], ["M", qsTr("Mute")], ["V", qsTr("Subtitles")]]
+                    delegate: Column {
+                        required property var modelData
+                        visible: root.availableWidth > 1100
+                        spacing: 6
+                        Kbd { anchors.horizontalCenter: parent.horizontalCenter; text: modelData[0] }
+                        Label { anchors.horizontalCenter: parent.horizontalCenter; role: "meta"; secondary: true; text: modelData[1] }
+                    }
+                }
+                Item { Layout.fillWidth: true }
+                Label {
+                    text: qsTr("View all shortcuts") + "  →"
+                    color: Theme.accentText
+                    font.pixelSize: 13
+                    font.weight: Font.DemiBold
+                    TapHandler { onTapped: root.navigate("settings") }
                 }
             }
         }

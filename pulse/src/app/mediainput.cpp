@@ -3,6 +3,7 @@
 #include <QCollator>
 #include <QDir>
 #include <QDirIterator>
+#include <QLocale>
 #include <QFileInfo>
 #include <QSet>
 #include <QStandardPaths>
@@ -166,6 +167,34 @@ QString MediaInput::scheme(const QUrl &url)
 QString MediaInput::picturesFolder()
 {
     return QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+}
+
+QString MediaInput::relativeTime(const QDateTime &when)
+{
+    if (!when.isValid())
+        return {};
+    const qint64 secs = when.secsTo(QDateTime::currentDateTime());
+    if (secs < 60)
+        return tr("just now");
+    if (secs < 3600) {
+        const int m = int(secs / 60);
+        return m == 1 ? tr("1 minute ago") : tr("%1 minutes ago").arg(m);
+    }
+    if (secs < 86400) {
+        const int h = int(secs / 3600);
+        return h == 1 ? tr("1 hour ago") : tr("%1 hours ago").arg(h);
+    }
+    const qint64 days = when.date().daysTo(QDate::currentDate());
+    if (days == 1)
+        return tr("Yesterday");
+    if (days < 7)
+        return tr("%1 days ago").arg(days);
+    return QLocale().toString(when.date(), QLocale::ShortFormat);
+}
+
+void MediaInput::clearThumbnailCache()
+{
+    QDir(QStandardPaths::writableLocation(QStandardPaths::CacheLocation) + QStringLiteral("/thumbs")).removeRecursively();
 }
 
 QStringList MediaInput::mediaArguments(const QStringList &args)

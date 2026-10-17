@@ -16,6 +16,8 @@ T.ApplicationWindow {
     readonly property bool customFrame: !(Prefs.useSystemFrame || AppInfo.mobile)
     readonly property bool fullscreen: visibility === Window.FullScreen
     property string route: "home"
+    // Video plays edge to edge; audio keeps the app shell (03).
+    readonly property bool immersive: route === "player" && Player.hasVideo
     property string lastRoute: "home"
     property int resumeFrom: 0
 
@@ -24,7 +26,8 @@ T.ApplicationWindow {
     minimumWidth: 360
     minimumHeight: 480
     visible: true
-    color: Theme.bg
+    readonly property bool framed: customFrame && !fullscreen && visibility !== Window.Maximized
+    color: framed ? "transparent" : Theme.bg
     title: Player.hasMedia ? Player.title + " — Pulse" : "Pulse"
     flags: customFrame ? (Qt.Window | Qt.FramelessWindowHint) : Qt.Window
     font.family: Theme.fontFamily
@@ -53,7 +56,7 @@ T.ApplicationWindow {
         }
         if (enqueue && Queue.count > 0) {
             Queue.append(media)
-            toast.show(qsTr("Added %n item(s) to the queue", "", media.length))
+            toast.show((media.length === 1 ? qsTr("Added 1 item to the queue") : qsTr("Added %1 items to the queue").arg(media.length)))
         } else {
             Queue.setItems(media, 0)
             navigate("player")
@@ -130,13 +133,25 @@ T.ApplicationWindow {
     }
 
     // ------------------------------------------------------------ layout
+    // Rounded body with an ember rim (custom frame only).
+    Rectangle {
+        anchors.fill: parent
+        radius: win.framed ? 14 : 0
+        color: Theme.bg
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "#121318" }
+            GradientStop { position: 1.0; color: Theme.bg }
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
+        anchors.margins: win.framed ? 1 : 0
         spacing: 0
 
         TitleBar {
             Layout.fillWidth: true
-            visible: win.customFrame && !win.compact && win.route !== "player"
+            visible: win.customFrame && !win.compact && !win.immersive
             window: win
             onSearchRequested: palette.open()
             onHomeRequested: win.navigate("home")
@@ -148,7 +163,7 @@ T.ApplicationWindow {
             Layout.leftMargin: 16
             Layout.rightMargin: 12
             Layout.topMargin: 8
-            visible: win.compact && win.route !== "player"
+            visible: win.compact && !win.immersive
             Logo { Layout.fillWidth: true }
             IconButton { iconName: "search"; label: qsTr("Search or run a command"); variant: "overlay"; onClicked: palette.open() }
         }
@@ -160,7 +175,7 @@ T.ApplicationWindow {
 
             Sidebar {
                 Layout.fillHeight: true
-                visible: !win.compact && win.route !== "player"
+                visible: !win.compact && !win.immersive
                 route: win.route
                 hasMedia: Player.hasMedia
                 onNavigate: (r) => win.navigate(r)
@@ -239,6 +254,15 @@ T.ApplicationWindow {
             route: win.route
             onNavigate: (r) => win.navigate(r)
         }
+    }
+
+    Rectangle {
+        visible: win.framed
+        anchors.fill: parent
+        radius: 14
+        color: "transparent"
+        border.width: 1
+        border.color: Theme.frameGlow
     }
 
     ResizeHandles { visible: win.customFrame && !win.fullscreen && win.visibility !== Window.Maximized; window: win }

@@ -20,6 +20,7 @@ pkg_check_modules(LIBVLC REQUIRED IMPORTED_TARGET libvlc>=4.0.0)
 add_library(pulse_engine STATIC
     src/engine/engine.cpp src/engine/engine.hpp
     src/engine/player.cpp src/engine/player.hpp
+    src/engine/thumbnailer.cpp src/engine/thumbnailer.hpp
     src/engine/videooutput.cpp src/engine/videooutput.hpp
 )
 target_include_directories(pulse_engine PUBLIC src)
@@ -61,9 +62,18 @@ qt_add_qml_module(pulse
     QML_FILES
         qml/Main.qml
         qml/theme/Theme.qml
+        qml/components/AccentGlow.qml
         qml/components/Card.qml
+        qml/components/DashedFrame.qml
+        qml/components/Glass.qml
+        qml/components/HeroScene.qml
         qml/components/FocusRing.qml
         qml/components/IconButton.qml
+        qml/components/InfoChip.qml
+        qml/components/PulseBars.qml
+        qml/components/PageBanner.qml
+        qml/components/SettingRow.qml
+        qml/components/SettingsCard.qml
         qml/components/Kbd.qml
         qml/components/Label.qml
         qml/components/Logo.qml
@@ -94,6 +104,8 @@ qt_add_qml_module(pulse
     RESOURCES
         assets/logo/pulse-mark.svg
         assets/logo/pulse-mark-mono.svg
+        assets/fx/ember.png
+        assets/fx/soft.png
         ${PULSE_ICONS}
         ${PULSE_FONTS}
 )

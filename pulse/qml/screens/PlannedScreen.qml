@@ -12,14 +12,22 @@ Item {
     property var points: []
     property bool compact: false
 
+    property bool banner: true
+
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: root.compact ? 16 : 40
         spacing: 20
-        Label { visible: root.title !== ""; role: "title"; text: root.title; Accessible.role: Accessible.Heading }
-        Label { visible: root.summary !== ""; Layout.fillWidth: true; secondary: true; wrapMode: Text.WordWrap; elide: Text.ElideNone; text: root.summary }
+        PageBanner {
+            visible: root.banner && root.title !== ""
+            Layout.fillWidth: true
+            compact: root.compact
+            title: root.title
+            subtitle: root.summary
+        }
         Card {
-            dashed: true
+            Layout.leftMargin: root.banner ? (root.compact ? 16 : 36) : 0
+            Layout.rightMargin: Layout.leftMargin
+            lit: true
             Layout.fillWidth: true
             Layout.maximumWidth: 720
             implicitHeight: col.implicitHeight + 40

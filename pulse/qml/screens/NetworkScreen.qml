@@ -19,16 +19,15 @@ T.ScrollView {
     ColumnLayout {
         width: root.availableWidth
         spacing: 24
-        ColumnLayout {
+        PageBanner {
             Layout.fillWidth: true
-            Layout.margins: root.compact ? 16 : 40
-            Layout.bottomMargin: 0
-            Label { role: "title"; text: qsTr("Network & Streams"); Accessible.role: Accessible.Heading }
-            Label { secondary: true; text: qsTr("Play from an address, or browse shares on your local network.") }
+            compact: root.compact
+            title: qsTr("Network & Streams")
+            subtitle: qsTr("Play content from the internet, your local network, or streaming devices.")
         }
         Card {
             Layout.fillWidth: true
-            Layout.leftMargin: root.compact ? 16 : 40
+            Layout.leftMargin: root.compact ? 16 : 36
             Layout.rightMargin: Layout.leftMargin
             implicitHeight: urlCol.implicitHeight + 40
             ColumnLayout {
@@ -54,7 +53,7 @@ T.ScrollView {
                         leftPadding: 14
                         inputMethodHints: Qt.ImhUrlCharactersOnly | Qt.ImhNoAutoUppercase
                         Accessible.name: qsTr("Network address")
-                        background: Rectangle { radius: 10; color: Theme.bg; border.width: 1; border.color: field.activeFocus ? Theme.accent : Theme.border }
+                        background: Rectangle { radius: 10; color: Qt.rgba(0.04, 0.04, 0.05, 0.7); border.width: 1; border.color: field.activeFocus ? Theme.accent : Theme.glassBorder }
                         onAccepted: root.submit(false)
                     }
                     PulseButton { variant: "primary"; iconName: "play"; text: qsTr("Play"); implicitHeight: 48; enabled: field.text.length > 0; onClicked: root.submit(false) }
@@ -66,7 +65,7 @@ T.ScrollView {
         }
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.leftMargin: root.compact ? 16 : 40
+            Layout.leftMargin: root.compact ? 16 : 36
             Layout.rightMargin: Layout.leftMargin
             spacing: 10
             Label { role: "section"; font.pixelSize: 16; text: qsTr("Recent addresses") }
@@ -77,7 +76,9 @@ T.ScrollView {
                 secondary: true
                 text: qsTr("Addresses you play appear here. Clear them from Home › Clear history.")
             }
-            Repeater {
+            Column {
+                Layout.fillWidth: true
+                Repeater {
                 model: Recent
                 delegate: T.ItemDelegate {
                     id: item
@@ -86,8 +87,8 @@ T.ScrollView {
                     visible: isStream
                     Component.onCompleted: if (isStream) noStreams.streams++
                     Component.onDestruction: if (isStream) noStreams.streams--
-                    Layout.fillWidth: true
-                    implicitHeight: isStream ? 52 : 0
+                    width: parent.width
+                    height: isStream ? 52 : 0
                     onClicked: root.play(url, false)
                     contentItem: RowLayout {
                         PulseIcon { name: "link"; color: Theme.textSecondary }
@@ -95,11 +96,15 @@ T.ScrollView {
                     }
                     background: Rectangle { radius: 10; color: item.hovered ? Theme.surface : "transparent"; FocusRing { target: item; radius_: 10 } }
                 }
+                }
             }
         }
         PlannedScreen {
             Layout.fillWidth: true
             Layout.preferredHeight: 200
+            Layout.leftMargin: root.compact ? 16 : 36
+            Layout.rightMargin: Layout.leftMargin
+            banner: false
             compact: root.compact
             title: ""
             phase: "P3"

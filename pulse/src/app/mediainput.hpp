@@ -1,6 +1,7 @@
 // Pulse — turning user input (paths, URLs, drops, folders) into playable URLs.
 #pragma once
 
+#include <QDateTime>
 #include <QObject>
 #include <QStringList>
 #include <QUrl>
@@ -31,6 +32,10 @@ public:
     Q_INVOKABLE static QString formatSize(qint64 bytes);
     Q_INVOKABLE static QString scheme(const QUrl &url);
     Q_INVOKABLE static QString picturesFolder();
+    /// "2 hours ago", "Yesterday", "3 days ago", or a short date.
+    Q_INVOKABLE static QString relativeTime(const QDateTime &when);
+    /// Deletes cached frame thumbnails; they are regenerated on demand.
+    Q_INVOKABLE static void clearThumbnailCache();
 
     static QStringList mediaArguments(const QStringList &args);
 };

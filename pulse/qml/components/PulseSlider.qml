@@ -7,7 +7,7 @@ T.Slider {
     id: control
     property bool centered: false
     property color fillColor: Theme.accent
-    property color trackColor: Theme.border
+    property color trackColor: Qt.rgba(1, 1, 1, 0.14)
     implicitHeight: 28
     implicitWidth: 160
     focusPolicy: Qt.StrongFocus
@@ -38,6 +38,8 @@ T.Slider {
         height: width
         radius: width / 2
         color: Theme.text
+        border.width: control.pressed ? 0 : 0
+        Rectangle { anchors.centerIn: parent; width: parent.width + 8; height: width; radius: width / 2; color: Qt.rgba(1, 0.416, 0.157, control.hovered || control.pressed ? 0.35 : 0.0); z: -1 }
         FocusRing { target: control; radius_: 9 }
     }
 }

@@ -4,154 +4,206 @@ import QtQuick.Layouts
 import Pulse
 import Pulse.Core
 
-// 10 — Settings. Only preferences that are wired to real behaviour appear.
-Item {
+// 10 — Settings. Only preferences wired to real behaviour appear.
+T.ScrollView {
     id: root
     property bool compact: false
     property string section: "general"
+    readonly property int pad: compact ? 16 : 36
+    readonly property bool all: section === "general"
+    contentWidth: availableWidth
 
     readonly property var sections: [
         { id: "general", text: qsTr("General") },
         { id: "playback", text: qsTr("Playback") },
-        { id: "av", text: qsTr("Audio & Video") },
         { id: "appearance", text: qsTr("Appearance") },
         { id: "shortcuts", text: qsTr("Shortcuts") },
         { id: "advanced", text: qsTr("Advanced") },
         { id: "about", text: qsTr("About") }
     ]
 
-    component Row_: Item {
-        id: r
-        property string label
-        property string description
-        default property alias control: slot.data
-        property bool first: false
-        Layout.fillWidth: true
-        implicitHeight: Math.max(64, textCol.implicitHeight + 32)
-        Rectangle { visible: !r.first; width: parent.width; height: 1; color: Theme.border }
-        RowLayout {
-            anchors.fill: parent
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            spacing: 24
-            ColumnLayout {
-                id: textCol
-                Layout.fillWidth: true
-                spacing: 2
-                Label { Layout.fillWidth: true; text: r.label; font.weight: Font.DemiBold }
-                Label { Layout.fillWidth: true; visible: r.description !== ""; role: "meta"; secondary: true; wrapMode: Text.WordWrap; elide: Text.ElideNone; text: r.description }
-            }
-            Row { id: slot }
+    ColumnLayout {
+        width: root.availableWidth
+        spacing: 18
+
+        PageBanner {
+            Layout.fillWidth: true
+            compact: root.compact
+            title: qsTr("Settings")
+            subtitle: qsTr("Customize your media experience.")
         }
-    }
 
-    RowLayout {
-        anchors.fill: parent
-        anchors.margins: root.compact ? 16 : 40
-        anchors.topMargin: root.compact ? 16 : 32
-        spacing: 28
-
-        ColumnLayout {
-            visible: !root.compact
-            Layout.fillWidth: false
-            Layout.preferredWidth: 200
-            Layout.maximumWidth: 200
-            Layout.alignment: Qt.AlignTop
-            spacing: 2
-            Label { role: "title"; text: qsTr("Settings"); Layout.bottomMargin: 20; Accessible.role: Accessible.Heading }
+        // Tabs with ember underline (10).
+        Flow {
+            Layout.fillWidth: true
+            Layout.leftMargin: root.pad
+            Layout.rightMargin: root.pad
+            spacing: 6
             Repeater {
                 model: root.sections
-                delegate: NavItem {
+                delegate: T.AbstractButton {
+                    id: tab
                     required property var modelData
-                    Layout.fillWidth: true
-                    implicitHeight: 40
-                    text: modelData.text
-                    selected: root.section === modelData.id
+                    readonly property bool on: root.section === modelData.id
+                    height: 44
+                    width: label.implicitWidth + 28
+                    focusPolicy: Qt.StrongFocus
+                    Accessible.role: Accessible.PageTab
+                    Accessible.name: modelData.text
+                    Accessible.selected: on
                     onClicked: root.section = modelData.id
+                    contentItem: Text {
+                        id: label
+                        text: tab.modelData.text
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        color: tab.on ? Theme.text : tab.hovered ? Theme.text : Theme.textSecondary
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 15
+                        font.weight: tab.on ? Font.DemiBold : Font.Medium
+                    }
+                    background: Item {
+                        Rectangle { visible: tab.on; anchors.bottom: parent.bottom; anchors.horizontalCenter: parent.horizontalCenter; width: parent.width - 8; height: 3; radius: 1.5; color: Theme.accent
+                            AccentGlow { strength: 0.6; glowRadius: 6 } }
+                        FocusRing { target: tab }
+                    }
                 }
             }
         }
 
-        T.ScrollView {
+        GridLayout {
             Layout.fillWidth: true
-            Layout.preferredWidth: 0
-            Layout.fillHeight: true
-            contentWidth: availableWidth
-            ColumnLayout {
-                width: parent.width
-                spacing: 16
-                Segmented {
-                    visible: root.compact
-                    Layout.fillWidth: true
-                    model: root.sections.map(s => ({ text: s.text, value: s.id }))
-                    value: root.section
-                    onActivated: (v) => root.section = v
-                }
-                Label { role: "section"; text: root.sections.find(s => s.id === root.section).text; Layout.topMargin: root.compact ? 0 : 66 }
-                Card {
-                    Layout.fillWidth: true
-                    radius: Theme.radiusCard
-                    implicitHeight: rows.implicitHeight
-                    ColumnLayout {
-                        id: rows
-                        width: parent.width
-                        spacing: 0
+            Layout.leftMargin: root.pad
+            Layout.rightMargin: root.pad
+            Layout.bottomMargin: 32
+            columns: root.compact || !root.all ? 1 : 2
+            columnSpacing: 18
+            rowSpacing: 18
 
-                        // General
-                        Row_ { visible: root.section === "general"; first: true; label: qsTr("Keep a list of recent files"); description: qsTr("Shown on Home. Stored only on this device.")
-                            PulseSwitch { checked: Prefs.keepRecent; onToggled: { Prefs.keepRecent = checked; Recent.enabled = checked } } }
-                        Row_ { visible: root.section === "general"; label: qsTr("Use system window frame"); description: qsTr("Instead of the Pulse title bar. Applies after restart.")
-                            PulseSwitch { checked: Prefs.useSystemFrame; onToggled: Prefs.useSystemFrame = checked } }
+            SettingsCard {
+                visible: root.all
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.alignment: Qt.AlignTop
+                iconName: "settings"
+                title: qsTr("App Preferences")
+                description: qsTr("General application settings and behavior.")
+                SettingRow { label: qsTr("Keep a list of recent files"); hint: qsTr("Shown on Home. Stored only on this device.")
+                    PulseSwitch { checked: Prefs.keepRecent; onToggled: { Prefs.keepRecent = checked; Recent.enabled = checked } } }
+                SettingRow { label: qsTr("Use system window frame"); hint: qsTr("Instead of the Pulse title bar. Applies after restart.")
+                    PulseSwitch { checked: Prefs.useSystemFrame; onToggled: Prefs.useSystemFrame = checked } }
+            }
 
-                        // Playback
-                        Row_ { visible: root.section === "playback"; first: true; label: qsTr("Resume where I left off"); description: qsTr("For files longer than 5 minutes. A Start over action is always offered.")
-                            PulseSwitch { checked: Prefs.resumePlayback; onToggled: Prefs.resumePlayback = checked } }
-                        Row_ { visible: root.section === "playback"; label: qsTr("Play the next item automatically"); description: qsTr("Continue through the queue or folder.")
-                            PulseSwitch { checked: Prefs.autoplayNext; onToggled: Prefs.autoplayNext = checked } }
-                        Row_ { visible: root.section === "playback"; label: qsTr("Seek step"); description: qsTr("Arrow keys and the skip buttons.")
-                            Segmented { width: 220; model: [{ text: "5 s", value: 5000 }, { text: "10 s", value: 10000 }, { text: "30 s", value: 30000 }]; value: Prefs.seekStepMs; onActivated: (v) => Prefs.seekStepMs = v } }
-                        Row_ { visible: root.section === "playback"; label: qsTr("Hide controls after"); description: qsTr("Controls stay while a menu or keyboard focus is active.")
-                            Segmented { width: 220; model: [{ text: "2 s", value: 2000 }, { text: "3 s", value: 3000 }, { text: "5 s", value: 5000 }]; value: Prefs.controlsHideMs; onActivated: (v) => Prefs.controlsHideMs = v } }
+            SettingsCard {
+                visible: root.all || root.section === "playback"
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.alignment: Qt.AlignTop
+                iconName: "play-circle"
+                title: qsTr("Playback Settings")
+                description: qsTr("Control how media is played.")
+                SettingRow { label: qsTr("Hardware Acceleration"); hint: qsTr("Use the GPU for better performance. Applies after restart.")
+                    PulseSwitch { checked: Prefs.hardwareDecoding; onToggled: Prefs.hardwareDecoding = checked } }
+                SettingRow { label: qsTr("Remember Playback Position"); hint: qsTr("Resume from where you left off.")
+                    PulseSwitch { checked: Prefs.resumePlayback; onToggled: Prefs.resumePlayback = checked } }
+                SettingRow { label: qsTr("Play Next Automatically"); hint: qsTr("Continue through the queue or folder.")
+                    PulseSwitch { checked: Prefs.autoplayNext; onToggled: Prefs.autoplayNext = checked } }
+                SettingRow { label: qsTr("Seek Step")
+                    Segmented { width: 200; model: [{ text: "5 s", value: 5000 }, { text: "10 s", value: 10000 }, { text: "30 s", value: 30000 }]; value: Prefs.seekStepMs; onActivated: (v) => Prefs.seekStepMs = v } }
+                SettingRow { label: qsTr("Hide Controls After")
+                    Segmented { width: 200; model: [{ text: "2 s", value: 2000 }, { text: "3 s", value: 3000 }, { text: "5 s", value: 5000 }]; value: Prefs.controlsHideMs; onActivated: (v) => Prefs.controlsHideMs = v } }
+            }
 
-                        // Audio & Video
-                        Row_ { visible: root.section === "av"; first: true; label: qsTr("Hardware decoding"); description: qsTr("Uses the GPU when the format allows. Applies after restart.")
-                            PulseSwitch { checked: Prefs.hardwareDecoding; onToggled: Prefs.hardwareDecoding = checked } }
-
-                        // Appearance
-                        Row_ { visible: root.section === "appearance"; first: true; label: qsTr("Theme"); description: qsTr("Signal Ember dark. Light and system themes will follow once fully designed.")
-                            Label { secondary: true; text: qsTr("Dark") } }
-                        Row_ { visible: root.section === "appearance"; label: qsTr("Reduce motion"); description: qsTr("Turns off decorative animation.")
-                            PulseSwitch { checked: Prefs.reduceMotion; onToggled: Prefs.reduceMotion = checked } }
-
-                        // Shortcuts (read-only list for now)
-                        Repeater {
-                            model: root.section === "shortcuts" ? [
-                                [qsTr("Play / pause"), "Space"], [qsTr("Seek back / forward"), "← / →"], [qsTr("Volume"), "↑ / ↓"],
-                                [qsTr("Fullscreen"), "F"], [qsTr("Mute"), "M"], [qsTr("Cycle subtitles"), "V"], [qsTr("Cycle audio track"), "B"],
-                                [qsTr("Next / previous"), "N / P"], [qsTr("Speed down / up"), "[ / ]"], [qsTr("Subtitle delay"), "G / H"],
-                                [qsTr("Screenshot"), "S"], [qsTr("Playback tools"), "T"], [qsTr("Command palette"), "Ctrl K"]] : []
-                            delegate: Row_ {
-                                required property var modelData
-                                required property int index
-                                first: index === 0
-                                label: modelData[0]
-                                Kbd { text: modelData[1] }
-                            }
+            SettingsCard {
+                visible: root.all || root.section === "appearance"
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.alignment: Qt.AlignTop
+                iconName: "palette"
+                title: qsTr("Appearance")
+                description: qsTr("Customize the look and feel of Pulse.")
+                SettingRow {
+                    label: qsTr("Theme")
+                    hint: qsTr("Light and System arrive once fully designed.")
+                    Repeater {
+                        model: [{ t: qsTr("Dark"), on: true }, { t: qsTr("Light"), on: false }, { t: qsTr("System"), on: false }]
+                        delegate: Rectangle {
+                            required property var modelData
+                            width: 78; height: 56; radius: 10
+                            color: modelData.on ? Qt.rgba(1, 0.416, 0.157, 0.12) : Qt.rgba(1, 1, 1, 0.03)
+                            border.width: modelData.on ? 1.5 : 1
+                            border.color: modelData.on ? Theme.accent : Theme.glassBorder
+                            opacity: modelData.on ? 1 : 0.45
+                            Accessible.role: Accessible.RadioButton
+                            Accessible.name: modelData.t
+                            Accessible.checked: modelData.on
+                            Text { anchors.centerIn: parent; text: parent.modelData.t; color: Theme.text; font.family: Theme.fontFamily; font.pixelSize: 13; font.weight: Font.DemiBold }
                         }
-
-                        // Advanced
-                        Row_ { visible: root.section === "advanced"; first: true; label: qsTr("Reset all settings"); description: qsTr("Recent files are kept.")
-                            PulseButton { variant: "danger"; text: qsTr("Reset"); implicitHeight: 36; onClicked: Prefs.resetAll() } }
-
-                        // About
-                        Row_ { visible: root.section === "about"; first: true; label: qsTr("Version"); Label { secondary: true; text: "Pulse " + AppInfo.version } }
-                        Row_ { visible: root.section === "about"; label: qsTr("Playback engine"); description: qsTr("Built from upstream VLC sources, unmodified.")
-                            Label { secondary: true; text: "libVLC " + Engine.coreVersion } }
-                        Row_ { visible: root.section === "about"; label: qsTr("License"); description: qsTr("Pulse is free software under the GNU GPL, version 2 or later.")
-                            PulseButton { text: qsTr("Source code"); implicitHeight: 36; onClicked: Qt.openUrlExternally("https://github.com/Mo3bdlaa/Pulse-Media-Player") } }
-                        Row_ { visible: root.section === "about"; label: qsTr("Credits"); description: qsTr("Pulse is an independent project. It is not affiliated with or endorsed by VideoLAN. Playback is powered by libVLC, © VideoLAN and contributors.") }
                     }
                 }
+                SettingRow { label: qsTr("Show Background Art"); hint: qsTr("Media artwork behind the audio player.")
+                    PulseSwitch { checked: Prefs.artworkBackground; onToggled: Prefs.artworkBackground = checked } }
+                SettingRow { label: qsTr("Reduce Motion"); hint: qsTr("Turns off embers, pulse bars and other animation.")
+                    PulseSwitch { checked: Prefs.reduceMotion; onToggled: Prefs.reduceMotion = checked } }
+            }
+
+            SettingsCard {
+                visible: root.all || root.section === "advanced"
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.alignment: Qt.AlignTop
+                iconName: "sliders-h"
+                title: qsTr("Advanced")
+                description: qsTr("Advanced settings for power users.")
+                SettingRow { label: qsTr("Clear Thumbnail Cache"); hint: qsTr("Frames are regenerated from your files when needed.")
+                    PulseButton { text: qsTr("Clear Now"); implicitHeight: 38; onClicked: MediaInput.clearThumbnailCache() } }
+                SettingRow { label: qsTr("Reset Settings"); hint: qsTr("Restore all settings to default. Recent files are kept.")
+                    PulseButton { variant: "danger"; text: qsTr("Reset"); implicitHeight: 38; onClicked: Prefs.resetAll() } }
+            }
+
+            SettingsCard {
+                visible: root.section === "shortcuts" || root.all
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.alignment: Qt.AlignTop
+                iconName: "keyboard"
+                title: qsTr("Keyboard Shortcuts")
+                description: qsTr("Every playback control has a key.")
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: 2
+                    columnSpacing: 16
+                    rowSpacing: 10
+                    Repeater {
+                        model: [
+                            [qsTr("Play / pause"), "Space"], [qsTr("Seek"), "← / →"], [qsTr("Volume"), "↑ / ↓"],
+                            [qsTr("Fullscreen"), "F"], [qsTr("Mute"), "M"], [qsTr("Subtitles"), "V"], [qsTr("Audio track"), "B"],
+                            [qsTr("Next / previous"), "N / P"], [qsTr("Speed"), "[ / ]"], [qsTr("Subtitle delay"), "G / H"],
+                            [qsTr("Screenshot"), "S"], [qsTr("Playback tools"), "T"], [qsTr("Command palette"), "Ctrl K"]]
+                        delegate: RowLayout {
+                            required property var modelData
+                            Layout.fillWidth: true
+                            Label { Layout.fillWidth: true; color: Theme.textEmphasis; text: modelData[0] }
+                            Kbd { text: modelData[1] }
+                        }
+                    }
+                }
+            }
+
+            SettingsCard {
+                visible: root.section === "about" || root.all
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                Layout.alignment: Qt.AlignTop
+                iconName: "info"
+                title: qsTr("About Pulse")
+                description: qsTr("Play anything. Feel more.")
+                SettingRow { label: qsTr("Version"); Label { secondary: true; text: "Pulse " + AppInfo.version } }
+                SettingRow { label: qsTr("Playback engine"); hint: qsTr("Built from upstream VLC sources, unmodified."); Label { secondary: true; text: "libVLC " + Engine.coreVersion } }
+                SettingRow { label: qsTr("License"); hint: qsTr("Free software under the GNU GPL, version 2 or later.")
+                    PulseButton { text: qsTr("Source code"); implicitHeight: 38; onClicked: Qt.openUrlExternally("https://github.com/Mo3bdlaa/Pulse-Media-Player") } }
+                Label { Layout.fillWidth: true; role: "meta"; secondary: true; wrapMode: Text.WordWrap; elide: Text.ElideNone
+                    text: qsTr("Pulse is an independent project, not affiliated with or endorsed by VideoLAN. Playback is powered by libVLC, © VideoLAN and contributors.") }
             }
         }
     }

@@ -28,22 +28,42 @@
 | 12 Expanded Now Playing | planned: P1, after frame thumbnails |
 | M1–M4 Phone | the same QML at compact width: `BottomNav`, bottom sheets |
 
-## Decisions standardised from the concept art
+## Visual direction (matches the concept art)
 
-* **Text on accent is dark** (`textOnAccent` #111217, 7:1). White on #FF6A28 is
-  only 2.9:1 and fails WCAG.
-* **Selection is never colour alone:** a raised fill, a 3 px accent bar and a
-  heavier weight. Keyboard focus is a gold ring (`highlight`).
-* **One sidebar for every screen:** Home, Library, Playlists, Network, Convert,
-  Settings. Now Playing and Queue appear above them only while media is loaded.
-  The player itself is immersive, with no sidebar.
-* **Phone navigation:** Home, Library, Playlists, Network, More. It is hidden in the player.
-* **No invented metadata:** thumbnails are neutral placeholders until frame
-  thumbnails land, titles come from tags or the file name, and online
-  enrichment is opt-in.
-* **Brand glow only on Home.** Operational screens stay matte.
-* **Logo:** `assets/logo/pulse-mark.svg` is provisional, traced by eye from
+The app follows the 12 concept screens in `docs/reference/`, not a flattened
+reinterpretation of them:
+
+* **Ember scene** (`qml/components/HeroScene.qml`): a molten planet over a ridge
+  line with drifting embers. It is drawn in code, so it is owned art and scales to
+  any size. It sits behind Home and every page banner (`PageBanner.qml`).
+* **Glow:** filled accent surfaces use the ember gradient
+  (`accentBright` → `accentDeep`) with a soft bloom (`AccentGlow.qml`). This
+  covers the primary button, the active nav item, the play ring, the active tool
+  tab and the timeline knob. The window has an ember rim (`frameGlow`).
+* **Glass:** cards and floating panels (tools, queue, settings groups,
+  recents) are translucent dark glass with a hairline border.
+* **Imagery is real:** recent files, the queue, Up Next and timeline previews
+  show frames from the user's files. Audio shows its embedded cover
+  (`ThumbnailProvider`, cached on disk). Placeholders appear only while
+  loading, or for streams.
+* **Player:** chapter labels over the timeline, a ring play button, two-line
+  track chips, rounded-square tool buttons, and a floating tools card with a
+  vertical tab rail (02 and 05).
+* **Audio (03):** artwork with bloom, title with the last word in ember, and
+  pulse bars. The bars are a decorative visualiser, not a waveform.
+* **Text on accent is white, bold, ≥ 14 px**, as in the concept art. On the
+  gradient this meets WCAG's 3:1 large/bold-text ratio, not the 4.5:1 body-text
+  ratio, so accent fills never carry small text.
+* **Selection is never colour alone:** a filled pill, a bolder weight and an
+  icon change. Keyboard focus is a gold ring (`highlight`).
+* **Reduce motion** stops the embers, the pulse bars and the loading pulse.
+* **Not shipped:** the copyrighted posters and stills in the concept art.
+* **Logo:** `assets/logo/pulse-mark.svg` is provisional, traced from
   `docs/reference/Pulse_Logo_24_Original_Reference.png`. A precise approved
   vector master is still required (design.md §2).
 * **Font:** Inter. Put `InterVariable.ttf` (SIL OFL) in `assets/fonts/` to
   bundle it; otherwise the system sans-serif is used.
+
+The design canvas boards in `screens/` predate this direction and are kept for
+layout and copy only. The concept art and the running app are the visual
+reference.

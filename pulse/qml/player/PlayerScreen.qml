@@ -2,11 +2,11 @@ import QtQuick
 import QtQuick.Controls.Basic as T
 import QtQuick.Layouts
 import QtQuick.Window
+import Qt5Compat.GraphicalEffects
 import Pulse
 import Pulse.Core
 
-// 02 — Video Player and 03 — Audio Player. Media is the hero; controls
-// appear on activity and fade after Prefs.controlsHideMs.
+// 02 — Video Player (immersive) and 03 — Audio Player (inside the app shell).
 Rectangle {
     id: root
     property var window
@@ -17,14 +17,15 @@ Rectangle {
     property string toolsTab: "video"
     readonly property bool videoMode: Player.hasVideo
     readonly property bool pinned: toolsOpen || queueOpen || bottomHover.hovered || topHover.hovered
-                                   || bottomBar.activeFocusInside || !Player.playing
+                                   || bottomBar.activeFocus || !Player.playing
     readonly property bool controlsVisible: !videoMode || pinned || hideTimer.running
+    readonly property var videoTrack: Player.videoTracks.length ? Player.videoTracks[0] : null
 
     signal back()
     signal toggleFullscreen()
     signal toast(string message)
 
-    color: videoMode ? "black" : Theme.bg
+    color: videoMode ? "black" : "transparent"
 
     function wake() { hideTimer.restart() }
     function openTools(tab) { toolsTab = tab || toolsTab; queueOpen = false; toolsOpen = true; wake() }
@@ -32,20 +33,25 @@ Rectangle {
         if (toolsOpen || queueOpen) { toolsOpen = false; queueOpen = false; return true }
         return false
     }
+    function snapshot() {
+        const p = Player.takeSnapshot(MediaInput.picturesFolder())
+        toast(p ? qsTr("Screenshot saved to Pictures") : qsTr("Couldn’t take a screenshot"))
+    }
+    // "Midnight Drive" -> "Midnight " + accent "Drive" (03)
+    function splitTitle(t) {
+        const i = t.lastIndexOf(" ")
+        return i > 0 ? [t.slice(0, i + 1), t.slice(i + 1)] : ["", t]
+    }
 
     Timer { id: hideTimer; interval: Prefs.controlsHideMs; running: true }
 
-    // ---------------------------------------------------------------- video
+    // ============================================================ VIDEO
     Item {
         id: stage
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: drawer.left
+        anchors.fill: parent
         visible: root.videoMode
 
         VideoOutput {
-            id: video
             anchors.fill: parent
             player: Player
         }
@@ -53,10 +59,9 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            acceptedButtons: Qt.LeftButton
             cursorShape: root.controlsVisible ? Qt.ArrowCursor : Qt.BlankCursor
             onPositionChanged: root.wake()
-            onClicked: (mouse) => {
+            onClicked: {
                 if (root.compact) { if (hideTimer.running) hideTimer.stop(); else root.wake(); return }
                 clickTimer.restart()
             }
@@ -65,144 +70,20 @@ Rectangle {
         }
     }
 
-    // ---------------------------------------------------------------- audio
-    Item {
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
-        anchors.left: parent.left
-        anchors.right: drawer.left
-        visible: !root.videoMode
-
-        RowLayout {
-            anchors.fill: parent
-            spacing: 0
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.margins: root.compact ? 20 : 40
-                Layout.topMargin: root.compact ? 64 : 84
-                spacing: root.compact ? 18 : 28
-
-                Item { Layout.fillHeight: true; visible: root.compact }
-                GridLayout {
-                    Layout.fillWidth: true
-                    columns: root.compact ? 1 : 2
-                    columnSpacing: 36
-                    rowSpacing: 20
-
-                    Rectangle {
-                        id: art
-                        readonly property int side: root.compact ? Math.min(root.width - 40, 320) : Math.max(160, Math.min(320, root.height - 420))
-                        Layout.preferredWidth: side
-                        Layout.preferredHeight: side
-                        Layout.alignment: root.compact ? Qt.AlignHCenter : Qt.AlignBottom
-                        radius: Theme.radiusPanel
-                        clip: true
-                        gradient: Gradient {
-                            GradientStop { position: 0; color: Theme.accent }
-                            GradientStop { position: 0.55; color: "#7A1F12" }
-                            GradientStop { position: 1; color: "#14090F" }
-                        }
-                        Logo { anchors.centerIn: parent; wordmark: false; markHeight: art.side * 0.22; visible: artwork.status !== Image.Ready }
-                        Image {
-                            id: artwork
-                            anchors.fill: parent
-                            source: Player.artworkUrl
-                            fillMode: Image.PreserveAspectCrop
-                            sourceSize: Qt.size(art.side * 2, art.side * 2)
-                            Accessible.name: qsTr("Album artwork")
-                        }
-                    }
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignBottom
-                        spacing: 10
-                        Label { Layout.fillWidth: true; role: "display"; font.pixelSize: root.compact ? 28 : 44; text: Player.title; wrapMode: Text.WordWrap; maximumLineCount: 2; Accessible.role: Accessible.Heading }
-                        Label { Layout.fillWidth: true; visible: Player.artist !== ""; text: Player.artist; font.pixelSize: 18; font.weight: Font.DemiBold; color: Theme.textEmphasis }
-                        Label {
-                            Layout.fillWidth: true
-                            visible: text !== ""
-                            secondary: true
-                            text: [Player.album, Player.date, Player.genre].filter(s => s !== "").join(" · ")
-                        }
-                    }
-                }
-
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 4
-                    Timeline { Layout.fillWidth: true; onVideo: false }
-                    RowLayout {
-                        Layout.fillWidth: true
-                        Label { role: "meta"; secondary: true; font.pixelSize: 13; text: MediaInput.formatTime(Player.time) }
-                        Item { Layout.fillWidth: true }
-                        Label { role: "meta"; secondary: true; font.pixelSize: 13; text: "−" + MediaInput.formatTime(Player.length - Player.time) }
-                    }
-                }
-
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 16
-                    IconButton { iconName: "shuffle"; label: qsTr("Shuffle"); checkedTint: Queue.shuffle; size: 48; iconSize: 22; onClicked: Queue.shuffle = !Queue.shuffle }
-                    IconButton { iconName: "previous"; label: qsTr("Previous"); size: 52; iconSize: 26; onClicked: Player.time > 3000 ? Player.seek(0) : Queue.previous() }
-                    IconButton { iconName: Player.playing ? "pause" : "play"; label: Player.playing ? qsTr("Pause") : qsTr("Play"); variant: "accent"; size: 72; iconSize: 30; onClicked: Player.togglePause() }
-                    IconButton { iconName: "next"; label: qsTr("Next"); size: 52; iconSize: 26; enabled: Queue.hasNext; onClicked: Queue.next() }
-                    IconButton { iconName: Queue.repeat === 2 ? "repeat-one" : "repeat"; label: qsTr("Repeat"); checkedTint: Queue.repeat !== 0; size: 48; iconSize: 22; onClicked: Queue.cycleRepeat() }
-                }
-
-                GridLayout {
-                    Layout.fillWidth: true
-                    columns: root.compact ? 3 : 4
-                    columnSpacing: 12
-                    rowSpacing: 12
-                    RowLayout {
-                        visible: !root.compact
-                        Layout.fillWidth: true
-                        IconButton { iconName: Player.muted || Player.volume === 0 ? "mute" : "volume"; label: Player.muted ? qsTr("Unmute") : qsTr("Mute"); size: 40; onClicked: Player.muted = !Player.muted }
-                        PulseSlider { Layout.fillWidth: true; from: 0; to: 125; value: Player.volume; Accessible.name: qsTr("Volume"); onMoved: Player.volume = value }
-                    }
-                    PulseButton { Layout.fillWidth: true; iconName: "headphones"; text: root.compact ? "" : qsTr("Output"); Accessible.name: qsTr("Output device"); onClicked: { Player.refreshAudioDevices(); root.openTools("audio") } }
-                    PulseButton { Layout.fillWidth: true; iconName: "gauge"; text: Player.rate.toFixed(2).replace(/0$/, "") + "×"; Accessible.name: qsTr("Playback speed"); onClicked: root.openTools("playback") }
-                    PulseButton { Layout.fillWidth: true; iconName: "equalizer"; text: root.compact ? "" : qsTr("Equalizer"); active: Player.equalizerEnabled; Accessible.name: qsTr("Equalizer"); onClicked: root.openTools("audio") }
-                }
-                Item { Layout.fillHeight: true }
-            }
-
-            // Up Next beside the audio player on wide windows.
-            Rectangle {
-                visible: !root.compact && root.width > 1100 && !root.toolsOpen && !root.queueOpen
-                Layout.preferredWidth: 360
-                Layout.fillHeight: true
-                color: Theme.bg
-                Rectangle { width: 1; height: parent.height; color: Theme.border }
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.margins: 20
-                    anchors.topMargin: 72
-                    Label { role: "section"; font.pixelSize: 18; text: qsTr("Up Next") }
-                    QueueList { Layout.fillWidth: true; Layout.fillHeight: true; dense: true }
-                }
-            }
-        }
-    }
-
-    // ---------------------------------------------------------------- top bar
+    // Top: title + technical line, actions, window controls.
     Item {
         id: topBar
+        visible: root.videoMode && opacity > 0
         anchors.left: parent.left
-        anchors.right: drawer.left
-        height: 96
+        anchors.right: parent.right
+        height: root.compact ? 72 : 110
         opacity: root.controlsVisible ? 1 : 0
-        visible: opacity > 0
         Behavior on opacity { NumberAnimation { duration: Prefs.reduceMotion ? 0 : Theme.motionControlsFade } }
         HoverHandler { id: topHover }
-
         Rectangle {
-            visible: root.videoMode
             anchors.fill: parent
             gradient: Gradient {
-                GradientStop { position: 0; color: Qt.rgba(0.016, 0.02, 0.03, 0.78) }
+                GradientStop { position: 0; color: Qt.rgba(0.02, 0.02, 0.03, 0.82) }
                 GradientStop { position: 1; color: "transparent" }
             }
         }
@@ -213,169 +94,342 @@ Rectangle {
         }
         RowLayout {
             anchors.fill: parent
-            anchors.margins: root.compact ? 8 : 20
+            anchors.margins: root.compact ? 10 : 26
             anchors.bottomMargin: 0
-            spacing: 12
-            IconButton { Layout.alignment: Qt.AlignTop; iconName: "chevron-left"; label: qsTr("Back"); variant: root.videoMode ? "overlay" : "plain"; onClicked: root.back() }
+            spacing: 14
+            IconButton { Layout.alignment: Qt.AlignTop; iconName: "chevron-left"; label: qsTr("Back"); variant: "overlay"; onClicked: root.back() }
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
-                Layout.topMargin: 2
-                spacing: 4
-                visible: root.videoMode
-                Label { Layout.fillWidth: true; role: "section"; font.pixelSize: root.compact ? 16 : 22; text: Player.title }
+                spacing: 6
+                Label { Layout.fillWidth: true; text: Player.title; font.pixelSize: root.compact ? 17 : 27; font.weight: Font.Bold; style: Text.Raised; styleColor: Qt.rgba(0, 0, 0, 0.35) }
                 Label {
                     Layout.fillWidth: true
                     visible: !root.compact
                     color: Theme.textEmphasis
-                    font.pixelSize: 13
-                    readonly property var v: Player.videoTracks.length ? Player.videoTracks[0] : null
-                    text: [v && v.width ? v.width + " × " + v.height : "", v ? (v.codecName || v.codec) : "",
-                           Player.chapters.length && Player.currentChapter >= 0 ? qsTr("Chapter %1 of %2 — %3").arg(Player.currentChapter + 1).arg(Player.chapters.length).arg(Player.chapters[Player.currentChapter].name) : ""]
-                          .filter(s => s !== "").join(" · ")
+                    font.pixelSize: 14
+                    text: [MediaInput.describe(Player.url).split(" · ")[0],
+                           root.videoTrack && root.videoTrack.width ? root.videoTrack.width + " × " + root.videoTrack.height : "",
+                           MediaInput.describe(Player.url).split(" · ")[1] || ""].filter(s => s && s !== "Stream").join("  •  ")
                 }
             }
-            Item { Layout.fillWidth: true; visible: !root.videoMode }
-            IconButton { Layout.alignment: Qt.AlignTop; visible: root.videoMode; iconName: "camera"; label: qsTr("Take screenshot"); variant: "overlay"
-                onClicked: { const p = Player.takeSnapshot(MediaInput.picturesFolder()); root.toast(p ? qsTr("Screenshot saved to Pictures") : qsTr("Couldn’t take a screenshot")) } }
-            IconButton { Layout.alignment: Qt.AlignTop; iconName: "info"; label: qsTr("Media information"); variant: root.videoMode ? "overlay" : "plain"; onClicked: root.openTools("info") }
+            IconButton { Layout.alignment: Qt.AlignTop; iconName: "camera"; label: qsTr("Take screenshot"); variant: "overlay"; onClicked: root.snapshot() }
+            IconButton { Layout.alignment: Qt.AlignTop; iconName: "info"; label: qsTr("Media information"); variant: "overlay"; onClicked: root.openTools("info") }
             Row {
                 Layout.alignment: Qt.AlignTop
                 visible: root.window && root.window.customFrame && !root.fullscreen
-                spacing: 2
-                IconButton { iconName: "minimize"; label: qsTr("Minimize"); variant: root.videoMode ? "overlay" : "plain"; iconSize: 16; onClicked: root.window.showMinimized() }
-                IconButton { iconName: "close"; label: qsTr("Close"); variant: root.videoMode ? "overlay" : "plain"; iconSize: 16; onClicked: root.window.close() }
+                spacing: 4
+                IconButton { iconName: "minimize"; label: qsTr("Minimize"); variant: "overlay"; iconSize: 16; onClicked: root.window.showMinimized() }
+                IconButton { iconName: "close"; label: qsTr("Close"); variant: "overlay"; iconSize: 16; onClicked: root.window.close() }
             }
         }
     }
 
-    // ---------------------------------------------------------------- bottom bar (video)
+    // Bottom: chapters + timeline, times + volume, track chips + transport + tools.
     FocusScope {
         id: bottomBar
-        readonly property bool activeFocusInside: activeFocus
         visible: root.videoMode && opacity > 0
         anchors.left: parent.left
-        anchors.right: drawer.left
+        anchors.right: parent.right
         anchors.bottom: parent.bottom
-        height: root.compact ? 150 : 200
+        height: (root.compact ? 150 : 210) + timeline.implicitHeight - 28
         opacity: root.controlsVisible ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: Prefs.reduceMotion ? 0 : Theme.motionControlsFade } }
         HoverHandler { id: bottomHover }
 
         Rectangle {
             anchors.fill: parent
-            anchors.topMargin: -100
+            anchors.topMargin: -120
             gradient: Gradient {
                 GradientStop { position: 0; color: "transparent" }
-                GradientStop { position: 1; color: Theme.scrim }
+                GradientStop { position: 0.55; color: Qt.rgba(0.02, 0.02, 0.03, 0.62) }
+                GradientStop { position: 1; color: Qt.rgba(0.02, 0.02, 0.03, 0.9) }
             }
         }
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.leftMargin: root.compact ? 12 : 24
-            anchors.rightMargin: root.compact ? 12 : 24
-            anchors.bottomMargin: root.compact ? 12 : 22
-            spacing: 6
+            anchors.leftMargin: root.compact ? 12 : 26
+            anchors.rightMargin: root.compact ? 12 : 26
+            anchors.bottomMargin: root.compact ? 12 : 24
+            spacing: 4
             Item { Layout.fillHeight: true }
-            Timeline { Layout.fillWidth: true }
+            Timeline { id: timeline; Layout.fillWidth: true; chapterLabels: !root.compact }
             RowLayout {
                 Layout.fillWidth: true
-                Label { font.pixelSize: 13; font.weight: Font.DemiBold
+                spacing: 10
+                Label { font.pixelSize: 15; font.weight: Font.DemiBold
                     text: MediaInput.formatTime(Player.time) + (Player.length > 0 ? "  /  " + MediaInput.formatTime(Player.length) : "") }
                 Item { Layout.fillWidth: true }
-                Label { visible: Player.length > 0; font.pixelSize: 13; color: Theme.textEmphasis; text: "−" + MediaInput.formatTime(Player.length - Player.time) }
+                IconButton { visible: !root.compact; iconName: Player.muted || Player.volume === 0 ? "mute" : "volume"; label: Player.muted ? qsTr("Unmute") : qsTr("Mute"); size: 36; onClicked: Player.muted = !Player.muted }
+                PulseSlider { visible: !root.compact; Layout.preferredWidth: 110; from: 0; to: 125; value: Player.volume; Accessible.name: qsTr("Volume"); onMoved: Player.volume = value }
+                Label { visible: Player.length > 0; font.pixelSize: 15; color: Theme.textEmphasis; text: "−" + MediaInput.formatTime(Player.length - Player.time) }
             }
-            // Transport stays centred regardless of what sits on either side.
             Item {
                 Layout.fillWidth: true
-                Layout.topMargin: 6
+                Layout.topMargin: 8
                 implicitHeight: 72
 
-                // left: track chips
-                RowLayout {
+                Row {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
-                    width: Math.max(0, centre.x - 16)
-                    clip: true
-                    visible: bottomBar.width > 900
-                    spacing: 8
-                    PulseButton {
+                    spacing: 10
+                    visible: bottomBar.width > 980
+                    InfoChip {
                         iconName: "subtitles"
-                        text: Player.subtitleTracks.length === 0 ? qsTr("No subtitles")
-                              : (Player.subtitleTracks.find(t => t.selected) || { name: qsTr("Subtitles off") }).name
+                        caption: qsTr("Subtitles")
+                        value: Player.subtitleTracks.length === 0 ? qsTr("None") : (Player.subtitleTracks.find(t => t.selected) || { name: qsTr("Off") }).name
                         onClicked: root.openTools("subs")
                     }
-                    PulseButton {
-                        visible: Player.audioTracks.length > 1
-                        iconName: "audio"
-                        text: (Player.audioTracks.find(t => t.selected) || { name: qsTr("Audio") }).name
+                    InfoChip {
+                        iconName: "volume"
+                        caption: qsTr("Audio")
+                        value: (Player.audioTracks.find(t => t.selected) || { name: qsTr("Default") }).name
                         onClicked: root.openTools("audio")
                     }
                 }
 
-                // centre: transport
-                RowLayout {
+                Row {
                     id: centre
                     anchors.centerIn: parent
-                    spacing: root.compact ? 4 : 10
-                    IconButton { iconName: "previous"; label: qsTr("Previous"); size: 48; iconSize: 24; onClicked: Player.time > 3000 ? Player.seek(0) : Queue.previous() }
-                    IconButton { iconName: "back10"; label: qsTr("Back %1 seconds").arg(Prefs.seekStepMs / 1000); size: 48; iconSize: 28; enabled: Player.seekable; onClicked: Player.seekBy(-Prefs.seekStepMs) }
-                    IconButton { iconName: Player.playing ? "pause" : "play"; label: Player.playing ? qsTr("Pause") : qsTr("Play"); variant: "accent"; size: 68; iconSize: 28; onClicked: Player.togglePause() }
-                    IconButton { iconName: "forward10"; label: qsTr("Forward %1 seconds").arg(Prefs.seekStepMs / 1000); size: 48; iconSize: 28; enabled: Player.seekable; onClicked: Player.seekBy(Prefs.seekStepMs) }
-                    IconButton { iconName: "next"; label: qsTr("Next"); size: 48; iconSize: 24; enabled: Queue.hasNext; onClicked: Queue.next() }
+                    spacing: root.compact ? 8 : 22
+                    IconButton { anchors.verticalCenter: parent.verticalCenter; visible: root.compact; iconName: "back10"; label: qsTr("Back %1 seconds").arg(Prefs.seekStepMs / 1000); size: 48; iconSize: 28; onClicked: Player.seekBy(-Prefs.seekStepMs) }
+                    IconButton { anchors.verticalCenter: parent.verticalCenter; iconName: "previous"; label: qsTr("Previous"); size: 48; iconSize: 26; onClicked: Player.time > 3000 ? Player.seek(0) : Queue.previous() }
+                    IconButton { anchors.verticalCenter: parent.verticalCenter; iconName: Player.playing ? "pause" : "play"; label: Player.playing ? qsTr("Pause") : qsTr("Play"); variant: "ring"; size: 64; iconSize: 28; onClicked: Player.togglePause() }
+                    IconButton { anchors.verticalCenter: parent.verticalCenter; iconName: "next"; label: qsTr("Next"); size: 48; iconSize: 26; enabled: Queue.hasNext; onClicked: Queue.next() }
+                    IconButton { anchors.verticalCenter: parent.verticalCenter; visible: root.compact; iconName: "forward10"; label: qsTr("Forward %1 seconds").arg(Prefs.seekStepMs / 1000); size: 48; iconSize: 28; onClicked: Player.seekBy(Prefs.seekStepMs) }
                 }
 
-                // right: speed, volume, tools, queue, fullscreen
-                RowLayout {
+                Row {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    spacing: 4
-                    PulseButton { visible: bottomBar.width > 760; implicitHeight: 40; text: Player.rate.toFixed(2).replace(/0$/, "") + "×"; Accessible.name: qsTr("Playback speed"); onClicked: root.openTools("playback") }
-                    IconButton { visible: bottomBar.width > 640; iconName: Player.muted || Player.volume === 0 ? "mute" : "volume"; label: Player.muted ? qsTr("Unmute") : qsTr("Mute"); size: 40; onClicked: Player.muted = !Player.muted }
-                    PulseSlider { visible: bottomBar.width > 1000; Layout.preferredWidth: 96; from: 0; to: 125; value: Player.volume; fillColor: Theme.text; trackColor: Qt.rgba(0.97, 0.96, 0.94, 0.22); Accessible.name: qsTr("Volume"); onMoved: Player.volume = value }
-                    IconButton { iconName: "tools"; label: qsTr("Playback tools"); size: 40; checkedTint: root.toolsOpen; onClicked: root.toolsOpen ? root.closePanels() : root.openTools() }
-                    IconButton { iconName: "queue"; label: qsTr("Queue"); size: 40; checkedTint: root.queueOpen; onClicked: { root.toolsOpen = false; root.queueOpen = !root.queueOpen } }
-                    IconButton { iconName: root.fullscreen ? "fullscreen-exit" : "fullscreen"; label: root.fullscreen ? qsTr("Exit fullscreen") : qsTr("Fullscreen"); size: 40; onClicked: root.toggleFullscreen() }
+                    spacing: 10
+                    visible: !root.compact
+                    PulseButton {
+                        visible: bottomBar.width > 760
+                        implicitHeight: 48
+                        iconName: "clock"
+                        text: Player.rate.toFixed(2).replace(/0$/, "") + " ×"
+                        Accessible.name: qsTr("Playback speed")
+                        onClicked: root.openTools("playback")
+                    }
+                    IconButton { iconName: "queue"; label: qsTr("Queue"); variant: "square"; size: 48; checkedTint: root.queueOpen; onClicked: { root.toolsOpen = false; root.queueOpen = !root.queueOpen } }
+                    IconButton { iconName: root.fullscreen ? "fullscreen-exit" : "fullscreen"; label: root.fullscreen ? qsTr("Exit fullscreen") : qsTr("Fullscreen"); variant: "square"; size: 48; onClicked: root.toggleFullscreen() }
+                    IconButton { iconName: "settings"; label: qsTr("Playback tools"); variant: "square"; size: 48; checkedTint: root.toolsOpen; onClicked: root.toolsOpen ? root.closePanels() : root.openTools() }
+                }
+                Row {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: root.compact
+                    IconButton { iconName: "tools"; label: qsTr("Playback tools"); onClicked: root.openTools() }
+                    IconButton { iconName: root.fullscreen ? "fullscreen-exit" : "fullscreen"; label: qsTr("Fullscreen"); onClicked: root.toggleFullscreen() }
                 }
             }
         }
     }
 
-    // ---------------------------------------------------------------- drawer (tools / queue)
-    Item {
-        id: drawer
-        anchors.top: parent.top
-        anchors.bottom: parent.bottom
+    // Floating tools card (02): top-right over the video.
+    ToolsPanel {
+        id: floatingTools
+        visible: !root.compact && root.toolsOpen
         anchors.right: parent.right
-        readonly property bool open: (root.toolsOpen || root.queueOpen) && !root.compact
-        width: open ? Math.min(Theme.toolsDrawer, root.width * 0.45) : 0
-        clip: true
-        Behavior on width { NumberAnimation { duration: Prefs.reduceMotion ? 0 : Theme.motionPanel; easing.type: Easing.OutCubic } }
+        anchors.top: parent.top
+        anchors.rightMargin: 22
+        anchors.topMargin: root.videoMode ? 92 : 76
+        width: Math.min(420, root.width - 44)
+        height: Math.min(560, root.height - anchors.topMargin - (root.videoMode ? 240 : 24))
+        floating: true
+        tab: root.toolsTab
+        onTabChanged: root.toolsTab = tab
+        onCloseRequested: root.toolsOpen = false
+        onToast: (m) => root.toast(m)
+        opacity: visible ? 1 : 0
+        Behavior on opacity { NumberAnimation { duration: Theme.motionFast } }
+    }
 
-        ToolsPanel {
-            visible: root.toolsOpen
-            width: Math.min(Theme.toolsDrawer, root.width * 0.45)
-            height: parent.height
-            tab: root.toolsTab
-            onTabChanged: root.toolsTab = tab
-            onCloseRequested: root.toolsOpen = false
-            onToast: (m) => root.toast(m)
+    // Floating queue card.
+    Glass {
+        visible: !root.compact && root.queueOpen
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.rightMargin: 22
+        anchors.topMargin: root.videoMode ? 92 : 76
+        width: Math.min(380, root.width - 44)
+        height: Math.min(560, root.height - anchors.topMargin - (root.videoMode ? 240 : 24))
+        lit: true
+        radius: 16
+        color: Qt.rgba(0.07, 0.075, 0.095, 0.94)
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: 16
+            RowLayout {
+                Label { Layout.fillWidth: true; role: "section"; font.pixelSize: 18; text: qsTr("Up Next") }
+                IconButton { iconName: "close"; label: qsTr("Close queue"); size: 36; iconSize: 16; variant: "tint"; onClicked: root.queueOpen = false }
+            }
+            QueueList { Layout.fillWidth: true; Layout.fillHeight: true; dense: true }
         }
-        Rectangle {
-            visible: root.queueOpen
-            width: Math.min(Theme.toolsDrawer, root.width * 0.45)
-            height: parent.height
-            color: Theme.surface
-            Rectangle { width: 1; height: parent.height; color: Theme.border }
+    }
+
+    // ============================================================ AUDIO (03)
+    Item {
+        anchors.fill: parent
+        visible: !root.videoMode
+
+        RowLayout {
+            anchors.fill: parent
+            anchors.margins: root.compact ? 16 : 28
+            spacing: 24
+
             ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 16
-                RowLayout {
-                    Label { Layout.fillWidth: true; role: "section"; font.pixelSize: 18; text: qsTr("Up Next") }
-                    IconButton { iconName: "close"; label: qsTr("Close queue"); size: 40; iconSize: 18; variant: "tint"; onClicked: root.queueOpen = false }
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                spacing: root.compact ? 18 : 24
+
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: root.compact ? 1 : 2
+                    columnSpacing: 30
+                    rowSpacing: 20
+
+                    Item {
+                        id: art
+                        readonly property int side: root.compact ? Math.min(root.width - 32, 320) : Math.max(180, Math.min(310, root.height - 420))
+                        Layout.preferredWidth: side
+                        Layout.preferredHeight: side
+                        Layout.alignment: root.compact ? Qt.AlignHCenter : Qt.AlignTop
+                        RectangularGlow {
+                            anchors.fill: parent
+                            glowRadius: 30
+                            spread: 0.05
+                            cornerRadius: 46
+                            color: Qt.rgba(1, 0.42, 0.16, 0.28)
+                        }
+                        MediaThumb {
+                            anchors.fill: parent
+                            radius: 16
+                            source: Player.url
+                            audio: true
+                            stream: !Player.url.toString().startsWith("file:")
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignTop
+                        spacing: 10
+                        Row {
+                            spacing: 8
+                            visible: badge.text !== ""
+                            Rectangle {
+                                width: badge.implicitWidth + 16; height: 26; radius: 6
+                                color: Qt.rgba(1, 0.416, 0.157, 0.12); border.width: 1; border.color: Theme.accent
+                                Text { id: badge; anchors.centerIn: parent; text: MediaInput.describe(Player.url).split(" · ")[0]; color: Theme.accentText; font.family: Theme.fontFamily; font.pixelSize: 12; font.weight: Font.Bold }
+                            }
+                            Rectangle {
+                                readonly property var t: Player.audioTracks.length ? Player.audioTracks[0] : null
+                                visible: !!t && t.sampleRate > 0
+                                width: rate.implicitWidth + 16; height: 26; radius: 6
+                                color: Qt.rgba(1, 1, 1, 0.05); border.width: 1; border.color: Theme.glassBorder
+                                Text { id: rate; anchors.centerIn: parent; text: parent.t ? (parent.t.sampleRate / 1000) + " kHz" + (parent.t.channels ? " · " + (parent.t.channels === 2 ? qsTr("Stereo") : parent.t.channels + " ch") : "") : ""; color: Theme.textEmphasis; font.family: Theme.fontFamily; font.pixelSize: 12; font.weight: Font.DemiBold }
+                            }
+                        }
+                        Text {
+                            Layout.fillWidth: true
+                            textFormat: Text.StyledText
+                            readonly property var parts: root.splitTitle(Player.title)
+                            text: parts[0].replace(/&/g, "&amp;").replace(/</g, "&lt;") + "<font color='" + Theme.accentBright + "'>" + parts[1].replace(/&/g, "&amp;").replace(/</g, "&lt;") + "</font>"
+                            color: Theme.text
+                            font.family: Theme.fontFamily
+                            font.pixelSize: root.compact ? 30 : 46
+                            font.weight: Font.ExtraBold
+                            font.letterSpacing: -0.8
+                            wrapMode: Text.WordWrap
+                            maximumLineCount: 2
+                            elide: Text.ElideRight
+                            Accessible.name: Player.title
+                        }
+                        Label { Layout.fillWidth: true; visible: Player.artist !== ""; text: Player.artist; font.pixelSize: 19; font.weight: Font.Medium; color: "#C9CCD8" }
+                        Label {
+                            Layout.fillWidth: true
+                            visible: text !== ""
+                            color: Theme.textSecondary
+                            font.pixelSize: 14
+                            text: [Player.album, Player.date, Player.genre].filter(s => s !== "").join("  •  ")
+                        }
+                        PulseBars {
+                            visible: !root.compact
+                            Layout.fillWidth: true
+                            Layout.topMargin: 12
+                            Layout.preferredHeight: 78
+                            progress: Player.position
+                            playing: Player.playing
+                            animated: !Prefs.reduceMotion
+                        }
+                    }
                 }
-                QueueList { Layout.fillWidth: true; Layout.fillHeight: true; dense: true }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 2
+                    Timeline { Layout.fillWidth: true; onVideo: false; chapterLabels: false }
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Label { secondary: true; font.pixelSize: 13; text: MediaInput.formatTime(Player.time) }
+                        Item { Layout.fillWidth: true }
+                        Label { secondary: true; font.pixelSize: 13; text: "−" + MediaInput.formatTime(Player.length - Player.time) }
+                    }
+                }
+
+                Item {
+                    Layout.fillWidth: true
+                    implicitHeight: 76
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: root.compact ? 14 : 30
+                        IconButton { anchors.verticalCenter: parent.verticalCenter; iconName: "shuffle"; label: qsTr("Shuffle"); checkedTint: Queue.shuffle; size: 48; iconSize: 22; onClicked: Queue.shuffle = !Queue.shuffle }
+                        IconButton { anchors.verticalCenter: parent.verticalCenter; iconName: "previous"; label: qsTr("Previous"); size: 52; iconSize: 26; onClicked: Player.time > 3000 ? Player.seek(0) : Queue.previous() }
+                        IconButton { anchors.verticalCenter: parent.verticalCenter; iconName: Player.playing ? "pause" : "play"; label: Player.playing ? qsTr("Pause") : qsTr("Play"); variant: "ring"; size: 68; iconSize: 30; onClicked: Player.togglePause() }
+                        IconButton { anchors.verticalCenter: parent.verticalCenter; iconName: "next"; label: qsTr("Next"); size: 52; iconSize: 26; enabled: Queue.hasNext; onClicked: Queue.next() }
+                        IconButton { anchors.verticalCenter: parent.verticalCenter; iconName: Queue.repeat === 2 ? "repeat-one" : "repeat"; label: qsTr("Repeat"); checkedTint: Queue.repeat !== 0; size: 48; iconSize: 22; onClicked: Queue.cycleRepeat() }
+                    }
+                    Row {
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: !root.compact && parent.width > 760
+                        spacing: 8
+                        IconButton { anchors.verticalCenter: parent.verticalCenter; iconName: Player.muted || Player.volume === 0 ? "mute" : "volume"; label: Player.muted ? qsTr("Unmute") : qsTr("Mute"); size: 40; onClicked: Player.muted = !Player.muted }
+                        PulseSlider { anchors.verticalCenter: parent.verticalCenter; width: 130; from: 0; to: 125; value: Player.volume; Accessible.name: qsTr("Volume"); onMoved: Player.volume = value }
+                    }
+                }
+
+                GridLayout {
+                    Layout.fillWidth: true
+                    columns: 3
+                    columnSpacing: 12
+                    InfoChip { Layout.fillWidth: true; iconName: "headphones"; caption: qsTr("Output Device"); value: qsTr("System default"); onClicked: { Player.refreshAudioDevices(); root.openTools("audio") } }
+                    InfoChip { Layout.fillWidth: true; iconName: "gauge"; caption: qsTr("Playback Speed"); value: Player.rate.toFixed(2).replace(/0$/, "") + "×"; onClicked: root.openTools("playback") }
+                    InfoChip { Layout.fillWidth: true; iconName: "equalizer"; caption: qsTr("Equalizer"); value: Player.equalizerEnabled ? (Player.equalizerPreset >= 0 ? Engine.equalizerPresets[Player.equalizerPreset] : qsTr("Custom")) : qsTr("Off"); onClicked: root.openTools("audio") }
+                }
+                Item { Layout.fillHeight: true }
+            }
+
+            // Up Next (03, right column).
+            Glass {
+                visible: !root.compact && root.width > 1000
+                Layout.preferredWidth: 300
+                Layout.fillHeight: true
+                radius: 16
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 16
+                    spacing: 8
+                    RowLayout {
+                        Label { Layout.fillWidth: true; role: "section"; font.pixelSize: 18; text: qsTr("Up Next") }
+                        Label { text: qsTr("Clear"); color: Theme.accentText; font.pixelSize: 13; font.weight: Font.DemiBold; visible: Queue.count > 1
+                            TapHandler { onTapped: { const u = Player.url; Queue.setItems([u], 0) } } }
+                    }
+                    QueueList { Layout.fillWidth: true; Layout.fillHeight: true; dense: true }
+                }
             }
         }
     }
@@ -389,9 +443,9 @@ Rectangle {
         visible: root.compact && (root.toolsOpen || root.queueOpen)
         onClosed: { root.toolsOpen = false; root.queueOpen = false }
         background: Rectangle {
-            color: Theme.surface
+            color: "#16181F"
             radius: Theme.radiusSheet
-            Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: Theme.radiusSheet; color: Theme.surface }
+            Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: Theme.radiusSheet; color: parent.color }
             Rectangle { anchors.horizontalCenter: parent.horizontalCenter; y: 10; width: 40; height: 5; radius: 3; color: Theme.border }
         }
         ToolsPanel {
@@ -399,6 +453,7 @@ Rectangle {
             anchors.fill: parent
             anchors.topMargin: 16
             color: "transparent"
+            border.width: 0
             tab: root.toolsTab
             onTabChanged: root.toolsTab = tab
             onCloseRequested: sheet.close()
@@ -407,20 +462,20 @@ Rectangle {
         QueueList { visible: root.queueOpen; anchors.fill: parent; anchors.margins: 16; anchors.topMargin: 28 }
     }
 
-    // ---------------------------------------------------------------- states
+    // ============================================================ STATES
     Rectangle {
-        anchors.centerIn: stage
+        anchors.centerIn: parent
         visible: Player.state === 1 || (Player.state === 2 && Player.buffering < 1 && Player.buffering > 0)
-        width: 64
-        height: 64
-        radius: 32
+        width: 72
+        height: 72
+        radius: 36
         color: Qt.rgba(0.07, 0.07, 0.09, 0.7)
         Accessible.role: Accessible.Animation
         Accessible.name: qsTr("Loading")
         Logo {
             anchors.centerIn: parent
             wordmark: false
-            markHeight: 22
+            markHeight: 24
             SequentialAnimation on opacity {
                 running: parent.visible && !Prefs.reduceMotion
                 loops: Animation.Infinite
@@ -430,12 +485,12 @@ Rectangle {
         }
     }
 
-    Card {
+    Glass {
         anchors.centerIn: parent
         visible: Player.state === 5
-        width: Math.min(460, root.width - 32)
+        width: Math.min(480, root.width - 32)
         implicitHeight: errCol.implicitHeight + 48
-        radius: Theme.radiusPanel
+        radius: 16
         border.color: Theme.error
         ColumnLayout {
             id: errCol

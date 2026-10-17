@@ -8,6 +8,7 @@
 #include "app/recentmedia.hpp"
 #include "engine/engine.hpp"
 #include "engine/player.hpp"
+#include "engine/thumbnailer.hpp"
 #include "engine/videooutput.hpp"
 
 #include <QFontDatabase>
@@ -77,6 +78,7 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine qml;
     qml.addImageProvider(QStringLiteral("icon"), new pulse::IconProvider);
+    qml.addImageProvider(QStringLiteral("thumb"), new pulse::ThumbnailProvider);
     qml.addImportPath(QStringLiteral("qrc:/qt/qml"));
     QObject::connect(&qml, &QQmlApplicationEngine::objectCreationFailed, &app,
                      [] { QCoreApplication::exit(1); }, Qt::QueuedConnection);

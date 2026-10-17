@@ -3,7 +3,7 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    readonly property color bg: "#111217"
+    readonly property color bg: "#0E0F13"
     readonly property color surface: "#1F2430"
     readonly property color surfaceRaised: "#2A2E39"
     readonly property color sunken: "#0B0C10"
@@ -13,13 +13,20 @@ QtObject {
     readonly property color textSecondary: "#AAAAB3"
     readonly property color iconMuted: "#6B6F7C"
     readonly property color accent: "#FF6A28"
-    readonly property color textOnAccent: "#111217"
+    readonly property color textOnAccent: "#FFFFFF"
     readonly property color accentText: "#FF8A4C"
     readonly property color highlight: "#FFD166"
     readonly property color error: "#FF5A63"
     readonly property color errorText: "#FF8A8F"
     readonly property color success: "#62C999"
     readonly property color scrim: "#D9040508"
+    readonly property color accentDeep: "#E2501A"
+    readonly property color accentBright: "#FF8A3D"
+    readonly property color accentGlow: "#73FF6A28"
+    readonly property color accentTint: "#2EFF6A28"
+    readonly property color glass: "#D1171920"
+    readonly property color glassBorder: "#1FFFFFFF"
+    readonly property color frameGlow: "#99FF6A28"
 
     readonly property var accentGradient: ["#FF6A28", "#FF9A3A", "#FFD166"]
 
@@ -54,7 +61,7 @@ QtObject {
     readonly property int touchTarget: 44
     readonly property int navItem: 44
     readonly property int titleBar: 56
-    readonly property int sidebar: 232
+    readonly property int sidebar: 168
     readonly property int playButton: 68
     readonly property int toolsDrawer: 420
     readonly property int compactBreakpoint: 720

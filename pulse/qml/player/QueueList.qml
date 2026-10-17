@@ -24,7 +24,7 @@ ListView {
         required property bool isAudio
         required property bool missing
         width: ListView.view.width
-        height: root.dense ? 56 : 60
+        height: root.dense ? 62 : 64
         opacity: missing ? 0.7 : 1
         Accessible.name: (isCurrent ? qsTr("Now playing: ") : "") + title
         onClicked: Queue.playIndex(index)
@@ -36,8 +36,9 @@ ListView {
 
         background: Rectangle {
             radius: 10
-            color: row.isCurrent ? Theme.surfaceRaised : row.hovered ? Qt.rgba(1, 1, 1, 0.04) : "transparent"
-            Rectangle { visible: row.isCurrent; width: 3; height: parent.height; radius: 1.5; color: Theme.accent }
+            color: row.isCurrent ? Theme.accentTint : row.hovered ? Qt.rgba(1, 1, 1, 0.04) : "transparent"
+            border.width: row.isCurrent ? 1 : 0
+            border.color: Qt.rgba(1, 0.416, 0.157, 0.7)
             FocusRing { target: row; radius_: 10 }
         }
         contentItem: RowLayout {
@@ -49,9 +50,9 @@ ListView {
                 Label { anchors.centerIn: parent; visible: !row.isCurrent; text: row.index + 1; role: "meta"; secondary: true }
             }
             MediaThumb {
-                Layout.preferredWidth: 64
-                Layout.preferredHeight: 36
-                radius: 6
+                Layout.preferredWidth: row.isAudio ? 44 : 64
+                Layout.preferredHeight: row.isAudio ? 44 : 36
+                radius: 8
                 source: row.url
                 audio: row.isAudio
                 stream: !row.url.toString().startsWith("file:")

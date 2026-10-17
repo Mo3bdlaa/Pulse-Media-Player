@@ -9,10 +9,22 @@ import Pulse.Core
 Rectangle {
     id: root
     property string tab: "video"
+    property bool floating: false
     signal closeRequested()
     signal toast(string message)
 
-    color: Theme.surface
+    readonly property var tabs: [
+        { value: "video", text: qsTr("Video"), icon: "monitor" },
+        { value: "audio", text: qsTr("Audio"), icon: "volume" },
+        { value: "subs", text: qsTr("Subtitles"), icon: "subtitles" },
+        { value: "playback", text: qsTr("Playback"), icon: "gauge" },
+        { value: "info", text: qsTr("Advanced"), icon: "settings" }
+    ]
+
+    color: floating ? Qt.rgba(0.07, 0.075, 0.095, 0.95) : "transparent"
+    radius: floating ? 16 : 0
+    border.width: floating ? 1 : 0
+    border.color: Qt.rgba(1, 0.416, 0.157, 0.35)
     Accessible.role: Accessible.Pane
     Accessible.name: qsTr("Playback tools")
 
@@ -51,7 +63,7 @@ Rectangle {
             text: (st.value > 0 ? "+" : "") + (st.value / 1000).toFixed(3) + " s" }
         PulseButton { text: "+"; implicitWidth: 40; implicitHeight: 40; leftPadding: 0; rightPadding: 0; Accessible.name: qsTr("Increase %1").arg(st.text); onClicked: st.changed(st.value + st.step) }
     }
-    component TrackChoice: ColumnLayout {
+    component TrackChoice: Column {
         id: tc
         property var tracks: []
         property string current
@@ -62,7 +74,7 @@ Rectangle {
         spacing: 4
         T.RadioButton {
             visible: tc.allowOff
-            Layout.fillWidth: true
+            width: tc.width
             checked: tc.current === ""
             text: qsTr("Off")
             onClicked: tc.off()
@@ -76,7 +88,7 @@ Rectangle {
             delegate: T.RadioButton {
                 id: rb
                 required property var modelData
-                Layout.fillWidth: true
+                width: tc.width
                 checked: modelData.selected
                 leftPadding: 14
                 rightPadding: 14
@@ -100,8 +112,65 @@ Rectangle {
         onAccepted: root.toast(Player.addSubtitleFile(selectedFile) ? qsTr("Subtitle added") : qsTr("Couldn’t load that subtitle file"))
     }
 
-    ColumnLayout {
+    RowLayout {
         anchors.fill: parent
+        spacing: 0
+
+        // Vertical tab rail (floating card).
+        Rectangle {
+            visible: root.floating
+            Layout.fillHeight: true
+            Layout.preferredWidth: 92
+            color: Qt.rgba(1, 1, 1, 0.025)
+            radius: root.radius
+            Column {
+                anchors.fill: parent
+                anchors.topMargin: 14
+                spacing: 6
+                Repeater {
+                    model: root.tabs
+                    delegate: T.AbstractButton {
+                        id: railTab
+                        required property var modelData
+                        readonly property bool on: root.tab === modelData.value
+                        x: 10
+                        width: 72
+                        height: 64
+                        focusPolicy: Qt.StrongFocus
+                        Accessible.role: Accessible.PageTab
+                        Accessible.name: modelData.text
+                        Accessible.selected: on
+                        onClicked: root.tab = modelData.value
+                        background: Rectangle {
+                            radius: 10
+                            color: railTab.hovered && !railTab.on ? Qt.rgba(1, 1, 1, 0.05) : "transparent"
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 10
+                                visible: railTab.on
+                                gradient: Gradient {
+                                    GradientStop { position: 0; color: Theme.accentBright }
+                                    GradientStop { position: 1; color: Theme.accentDeep }
+                                }
+                                AccentGlow { strength: 0.6; glowRadius: 10 }
+                            }
+                            FocusRing { target: railTab; radius_: 10 }
+                        }
+                        contentItem: Column {
+                            spacing: 5
+                            topPadding: 10
+                            PulseIcon { anchors.horizontalCenter: parent.horizontalCenter; name: railTab.modelData.icon; size: 22; color: railTab.on ? Theme.textOnAccent : Theme.textEmphasis }
+                            Text { anchors.horizontalCenter: parent.horizontalCenter; text: railTab.modelData.text; color: railTab.on ? Theme.textOnAccent : Theme.textEmphasis; font.family: Theme.fontFamily; font.pixelSize: 12; font.weight: railTab.on ? Font.Bold : Font.Medium }
+                        }
+                    }
+                }
+            }
+            Rectangle { anchors.right: parent.right; width: 1; height: parent.height; color: Qt.rgba(1, 1, 1, 0.06) }
+        }
+
+    ColumnLayout {
+        Layout.fillWidth: true
+        Layout.fillHeight: true
         spacing: 0
 
         RowLayout {
@@ -109,19 +178,20 @@ Rectangle {
             Layout.margins: 20
             Layout.bottomMargin: 12
             spacing: 12
-            PulseIcon { name: "tools"; color: Theme.accent; size: 22 }
-            Label { Layout.fillWidth: true; role: "section"; font.pixelSize: 18; text: qsTr("Playback tools") }
+            PulseIcon { visible: !root.floating; name: "tools"; color: Theme.accent; size: 22 }
+            Label { Layout.fillWidth: true; role: "section"; font.pixelSize: 18; text: qsTr("Playback Tools") }
             IconButton { iconName: "close"; label: qsTr("Close playback tools"); size: 40; iconSize: 18; variant: "tint"; onClicked: root.closeRequested() }
         }
         Segmented {
+            visible: !root.floating
             Layout.fillWidth: true
             Layout.leftMargin: 12
             Layout.rightMargin: 12
-            model: [{ text: qsTr("Video"), value: "video" }, { text: qsTr("Audio"), value: "audio" }, { text: qsTr("Subtitles"), value: "subs" }, { text: qsTr("Playback"), value: "playback" }, { text: qsTr("Info"), value: "info" }]
+            model: root.tabs
             value: root.tab
             onActivated: (v) => root.tab = v
         }
-        Rectangle { Layout.fillWidth: true; Layout.topMargin: 12; height: 1; color: Theme.border }
+        Rectangle { visible: !root.floating; Layout.fillWidth: true; Layout.topMargin: 12; height: 1; color: Theme.border }
 
         T.ScrollView {
             Layout.fillWidth: true
@@ -141,8 +211,9 @@ Rectangle {
                     spacing: 14
                     RowLayout {
                         Layout.fillWidth: true
-                        Section { Layout.fillWidth: true; text: qsTr("Picture") }
-                        PulseButton { variant: "quiet"; text: qsTr("Reset"); implicitHeight: 32; onClicked: Player.resetPicture() }
+                        Section { Layout.fillWidth: true; text: qsTr("Video Adjustments") }
+                        Label { text: qsTr("Reset"); color: Theme.accentText; font.pixelSize: 13; font.weight: Font.DemiBold
+                            TapHandler { onTapped: Player.resetPicture() } }
                     }
                     SliderRow { text: qsTr("Brightness"); value: Player.brightness; onMoved: (v) => Player.brightness = v }
                     SliderRow { text: qsTr("Contrast"); value: Player.contrast; onMoved: (v) => Player.contrast = v }
@@ -163,12 +234,11 @@ Rectangle {
                         value: Player.cropRatio
                         onActivated: (v) => Player.cropRatio = v
                     }
-                    Section { text: qsTr("Deinterlace") }
-                    Segmented {
+                    RowLayout {
                         Layout.fillWidth: true
-                        model: [{ text: qsTr("Auto"), value: -1 }, { text: qsTr("Off"), value: 0 }, { text: qsTr("On"), value: 1 }]
-                        value: Player.deinterlace
-                        onActivated: (v) => Player.deinterlace = v
+                        Section { Layout.fillWidth: true; text: qsTr("Deinterlace") }
+                        Label { secondary: true; font.pixelSize: 12; text: Player.deinterlace === -1 ? qsTr("Auto") : "" }
+                        PulseSwitch { checked: Player.deinterlace === 1; onToggled: Player.deinterlace = checked ? 1 : -1; Accessible.name: qsTr("Deinterlace") }
                     }
                 }
 
@@ -238,13 +308,17 @@ Rectangle {
                         }
                     }
                     Section { text: qsTr("Output device") }
-                    Repeater {
+                    Column {
+                        Layout.fillWidth: true
+                        spacing: 6
+                        Repeater {
                         model: Player.audioDevices
                         delegate: PulseButton {
                             required property var modelData
-                            Layout.fillWidth: true
+                            width: parent.width
                             text: modelData.name || modelData.id
                             onClicked: Player.setAudioDevice(modelData.id)
+                        }
                         }
                     }
                     Label { visible: Player.audioDevices.length === 0; secondary: true; text: qsTr("System default") }
@@ -287,13 +361,15 @@ Rectangle {
                         PulseButton { variant: "quiet"; text: qsTr("Clear"); enabled: Player.loopA >= 0; onClicked: Player.clearLoop() }
                     }
                     Section { text: qsTr("Chapters"); visible: Player.chapters.length > 0 }
-                    Repeater {
+                    Column {
+                        Layout.fillWidth: true
+                        Repeater {
                         model: Player.chapters
                         delegate: T.ItemDelegate {
                             id: ch
                             required property var modelData
                             required property int index
-                            Layout.fillWidth: true
+                            width: parent.width
                             implicitHeight: 44
                             onClicked: Player.setChapter(index)
                             contentItem: RowLayout {
@@ -304,6 +380,7 @@ Rectangle {
                             }
                             background: Rectangle { radius: 10; color: Player.currentChapter === ch.index ? Qt.rgba(1, 0.416, 0.157, 0.1) : ch.hovered ? Qt.rgba(1, 1, 1, 0.04) : "transparent"
                                 border.width: Player.currentChapter === ch.index ? 1 : 0; border.color: Theme.accent; FocusRing { target: ch; radius_: 10 } }
+                        }
                         }
                     }
                     PulseButton {
@@ -325,18 +402,18 @@ Rectangle {
                     Layout.fillWidth: true
                     spacing: 10
                     Section { text: qsTr("Stream information") }
-                    GridLayout {
+                    Column {
                         Layout.fillWidth: true
-                        columns: 2
-                        columnSpacing: 12
-                        rowSpacing: 8
-                        Label { secondary: true; text: qsTr("Location") }
-                        Label { Layout.fillWidth: true; wrapMode: Text.WrapAnywhere; elide: Text.ElideNone; text: Player.url.toString() }
+                        spacing: 8
+                        Label { width: parent.width; secondary: true; text: qsTr("Location") }
+                        Label { width: parent.width; wrapMode: Text.WrapAnywhere; elide: Text.ElideNone; text: Player.url.toString() }
                         Repeater {
                             model: Player.videoTracks
                             delegate: Label {
                                 required property var modelData
-                                Layout.columnSpan: 2
+                                width: parent.width
+                                wrapMode: Text.WordWrap
+                                elide: Text.ElideNone
                                 text: qsTr("Video") + " · " + (modelData.codecName || modelData.codec) + (modelData.width ? " · " + modelData.width + " × " + modelData.height : "")
                                       + (modelData.frameRate ? " · " + modelData.frameRate.toFixed(3) + " fps" : "")
                             }
@@ -345,7 +422,9 @@ Rectangle {
                             model: Player.audioTracks
                             delegate: Label {
                                 required property var modelData
-                                Layout.columnSpan: 2
+                                width: parent.width
+                                wrapMode: Text.WordWrap
+                                elide: Text.ElideNone
                                 text: qsTr("Audio") + " · " + modelData.name + " · " + (modelData.codecName || modelData.codec)
                                       + (modelData.sampleRate ? " · " + (modelData.sampleRate / 1000) + " kHz" : "") + (modelData.channels ? " · " + modelData.channels + " ch" : "")
                             }
@@ -358,5 +437,5 @@ Rectangle {
             }
         }
     }
-    Rectangle { width: 1; height: parent.height; color: Theme.border }
+    }
 }

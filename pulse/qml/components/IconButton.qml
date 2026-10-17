@@ -2,12 +2,14 @@ import QtQuick
 import QtQuick.Controls.Basic as T
 import Pulse
 
-// Icon-only button. `label` is the accessible name and tooltip.
+// Icon-only button; `label` is the accessible name and tooltip.
+// variants: plain | overlay | tint | accent (filled) | ring (outlined glow — 02/03 play)
+//           | square (bordered rounded square — 02 pip/fullscreen/settings)
 T.Button {
     id: control
     property string iconName
     property string label
-    property string variant: "plain"   // plain | overlay | accent | tint
+    property string variant: "plain"
     property int size: Theme.touchTarget
     property int iconSize: 20
     property bool checkedTint: false
@@ -29,29 +31,32 @@ T.Button {
             name: control.iconName
             size: control.iconSize
             color: control.variant === "accent" ? Theme.textOnAccent
-                 : control.checkedTint ? Theme.accent
+                 : control.variant === "ring" || control.checkedTint ? Theme.accent
                  : control.variant === "tint" ? Theme.textSecondary : Theme.text
         }
     }
 
     background: Rectangle {
-        radius: width / 2
+        radius: control.variant === "square" ? 10 : width / 2
+        gradient: control.variant === "accent" ? fill : null
         color: {
-            if (control.variant === "accent")
-                return control.down ? Qt.darker(Theme.accent, 1.15) : control.hovered ? Qt.lighter(Theme.accent, 1.08) : Theme.accent
-            if (control.variant === "overlay")
-                return control.hovered ? Qt.rgba(0.07, 0.07, 0.09, 0.8) : Qt.rgba(0.07, 0.07, 0.09, 0.55)
-            return control.down ? Qt.rgba(1, 1, 1, 0.12) : control.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+            switch (control.variant) {
+            case "accent": return Theme.accent
+            case "ring": return control.hovered ? Qt.rgba(1, 0.416, 0.157, 0.16) : Qt.rgba(0.05, 0.05, 0.06, 0.45)
+            case "overlay": return control.hovered ? Qt.rgba(0.07, 0.07, 0.09, 0.85) : Qt.rgba(0.07, 0.07, 0.09, 0.55)
+            case "square": return control.hovered ? Qt.rgba(0.16, 0.17, 0.21, 0.92) : Theme.glass
+            default: return control.down ? Qt.rgba(1, 1, 1, 0.12) : control.hovered ? Qt.rgba(1, 1, 1, 0.08) : "transparent"
+            }
         }
-        Rectangle {
-            visible: control.variant === "accent" && control.size >= 60
-            anchors.fill: parent
-            anchors.margins: -6
-            radius: width / 2
-            color: "transparent"
-            border.width: 6
-            border.color: Qt.rgba(1, 0.416, 0.157, 0.22)
+        border.width: control.variant === "ring" ? 2.5 : control.variant === "square" ? 1 : 0
+        border.color: control.variant === "ring" ? Theme.accent
+                    : control.checkedTint ? Qt.rgba(1, 0.416, 0.157, 0.6) : Theme.glassBorder
+        Gradient {
+            id: fill
+            GradientStop { position: 0.0; color: Theme.accentBright }
+            GradientStop { position: 1.0; color: Theme.accentDeep }
         }
+        AccentGlow { visible: control.variant === "ring" || control.variant === "accent"; strength: control.hovered ? 1 : 0.7 }
         FocusRing { target: control }
     }
 }

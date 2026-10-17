@@ -12,7 +12,7 @@ T.Switch {
         width: 44
         height: 26
         radius: 13
-        color: control.checked ? Theme.accent : Theme.border
+        color: control.checked ? Theme.accent : Qt.rgba(1, 1, 1, 0.14)
         Behavior on color { ColorAnimation { duration: Theme.motionFast } }
         Rectangle {
             y: 3
@@ -20,7 +20,7 @@ T.Switch {
             width: 20
             height: 20
             radius: 10
-            color: control.checked ? Theme.textOnAccent : Theme.textSecondary
+            color: control.checked ? "#FFFFFF" : Theme.textSecondary
             Behavior on x { NumberAnimation { duration: Theme.motionFast; easing.type: Easing.OutCubic } }
         }
         FocusRing { target: control; radius_: 13 }

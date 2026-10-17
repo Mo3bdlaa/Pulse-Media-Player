@@ -44,6 +44,7 @@ case "$profile" in
             -Davcodec=enabled
             -Davformat=enabled
             -Dswscale=enabled
+            -Dtaglib=enabled
         )
         ;;
     *) echo "unknown profile: $profile" >&2; exit 2 ;;

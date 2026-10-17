@@ -10,8 +10,8 @@ Rectangle {
     signal searchRequested()
     signal homeRequested()
 
-    implicitHeight: Theme.titleBar
-    color: Theme.bg
+    implicitHeight: Theme.titleBar + 8
+    color: "transparent"
 
     DragHandler {
         target: null
@@ -24,8 +24,10 @@ Rectangle {
     }
 
     Logo {
-        x: 20
+        x: 22
         anchors.verticalCenter: parent.verticalCenter
+        markHeight: 26
+        wordSize: 18
         TapHandler { onTapped: root.homeRequested() }
     }
 
@@ -54,10 +56,10 @@ Rectangle {
         leftPadding: 12
         rightPadding: 8
         background: Rectangle {
-            radius: Theme.radiusControl
-            color: Theme.surface
+            radius: 10
+            color: Qt.rgba(0.09, 0.09, 0.11, 0.85)
             border.width: 1
-            border.color: search.hovered ? Theme.textSecondary : Theme.border
+            border.color: search.hovered ? Qt.rgba(1, 0.416, 0.157, 0.5) : Theme.glassBorder
             FocusRing { target: search }
         }
     }
@@ -77,5 +79,5 @@ Rectangle {
         IconButton { iconName: "close"; label: qsTr("Close"); iconSize: 16; width: 44; height: 36; onClicked: root.window.close() }
     }
 
-    Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Theme.border }
+    Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Qt.rgba(1, 1, 1, 0.06) }
 }
