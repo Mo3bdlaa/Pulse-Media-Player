@@ -169,6 +169,16 @@ QString MediaInput::picturesFolder()
     return QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
 }
 
+QUrl MediaInput::folderOf(const QUrl &url)
+{
+    return url.isLocalFile() ? QUrl::fromLocalFile(QFileInfo(url.toLocalFile()).absolutePath()) : QUrl();
+}
+
+QUrl MediaInput::localUrl(const QString &path)
+{
+    return QUrl::fromLocalFile(path);
+}
+
 QString MediaInput::relativeTime(const QDateTime &when)
 {
     if (!when.isValid())

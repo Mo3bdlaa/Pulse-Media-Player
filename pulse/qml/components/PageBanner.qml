@@ -21,12 +21,15 @@ Item {
     }
     ColumnLayout {
         anchors.left: parent.left
+        anchors.right: root.compact ? parent.right : undefined
+        anchors.rightMargin: 16
         anchors.bottom: parent.bottom
         anchors.leftMargin: root.compact ? 16 : 36
         anchors.bottomMargin: root.compact ? 14 : 26
         spacing: 6
         Label { role: "title"; font.pixelSize: root.compact ? 28 : 36; text: root.title; Accessible.role: Accessible.Heading }
-        Label { visible: root.subtitle !== ""; color: Theme.textEmphasis; font.pixelSize: 15; text: root.subtitle }
+        Label { Layout.fillWidth: root.compact; visible: root.subtitle !== ""; color: Theme.textEmphasis; font.pixelSize: 15; text: root.subtitle
+            wrapMode: root.compact ? Text.WordWrap : Text.NoWrap; elide: root.compact ? Text.ElideNone : Text.ElideRight }
     }
     Row {
         id: actionRow

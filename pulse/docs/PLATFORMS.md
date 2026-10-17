@@ -35,6 +35,12 @@ Controls appear only where the platform and the build support them.
 | Screenshot | ✅ | ✅ | ✅ | |
 | Picture-in-picture | ⏳ | ⏳ | ⏳ | per-OS APIs |
 | Local network browsing (SMB, UPnP) | ⏳ P3 | ⏳ | ⏳ needs Local Network permission | |
-| Library | ⏳ P2 | ⏳ | ⏳ | VideoLAN `medialibrary` |
-| Convert / export | ⏳ P3 | maybe | no | desktop first |
+| Library (folders you add) | ✅ | ✅ needs storage permission | ✅ app documents | Pulse's own index (`src/app/library.cpp`); no `medialibrary` dependency |
+| Playlists, M3U import/export | ✅ | ✅ | ✅ | |
+| Convert / export | ✅ helper process | in process | in process | needs the core's `stream_out_transcode` and FFmpeg encoders |
 | Background audio, media keys | ⏳ | ⏳ | ⏳ | MPRIS / SMTC / MPNowPlaying |
+
+Desktop conversions run in `pulse-convert`, a helper executable installed next
+to `pulse`, so a fault in an encoder fails that job instead of the player.
+Android and iOS do not allow helper processes, so there the same `Transcoder`
+runs inside the app.

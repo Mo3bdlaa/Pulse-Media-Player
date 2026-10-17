@@ -1,12 +1,16 @@
 // Pulse — application entry point.
 
 #include "app/appinfo.hpp"
+#include "app/convertqueue.hpp"
 #include "app/iconprovider.hpp"
+#include "app/library.hpp"
 #include "app/mediainput.hpp"
+#include "app/playlists.hpp"
 #include "app/playqueue.hpp"
 #include "app/preferences.hpp"
 #include "app/recentmedia.hpp"
 #include "engine/engine.hpp"
+#include "engine/mediaprobe.hpp"
 #include "engine/player.hpp"
 #include "engine/thumbnailer.hpp"
 #include "engine/videooutput.hpp"
@@ -57,6 +61,18 @@ int main(int argc, char *argv[])
     pulse::PlayQueue queue;
     pulse::RecentMedia recent;
     pulse::MediaInput input;
+    pulse::Library library;
+    pulse::Playlists playlists;
+    pulse::ConvertQueue converter;
+
+    // One background probe feeds durations and tags to the Library and Playlists.
+    pulse::MediaProbe probe;
+    QObject::connect(&library, &pulse::Library::probeRequested, &probe, &pulse::MediaProbe::probe);
+    QObject::connect(&playlists, &pulse::Playlists::probeRequested, &probe, &pulse::MediaProbe::probe);
+    QObject::connect(&probe, &pulse::MediaProbe::probed, &library, &pulse::Library::applyProbe);
+    QObject::connect(&probe, &pulse::MediaProbe::probed, &playlists, &pulse::Playlists::applyProbe);
+    library.rescan();
+    playlists.refreshDurations();
 
     pulse::AppInfo info;
     info.version = QStringLiteral(PULSE_VERSION);
@@ -74,6 +90,10 @@ int main(int argc, char *argv[])
     qmlRegisterSingletonInstance(uri, 1, 0, "Prefs", &prefs);
     qmlRegisterSingletonInstance(uri, 1, 0, "MediaInput", &input);
     qmlRegisterSingletonInstance(uri, 1, 0, "AppInfo", &info);
+    qmlRegisterSingletonInstance(uri, 1, 0, "Library", &library);
+    qmlRegisterSingletonInstance(uri, 1, 0, "Playlists", &playlists);
+    qmlRegisterSingletonInstance(uri, 1, 0, "Converter", &converter);
+    qmlRegisterUncreatableType<pulse::ConvertJobs>(uri, 1, 0, "ConvertJobs", QStringLiteral("Owned by Converter"));
     qmlRegisterType<pulse::VideoOutput>(uri, 1, 0, "VideoOutput");
 
     QQmlApplicationEngine qml;

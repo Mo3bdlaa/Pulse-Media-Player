@@ -13,6 +13,7 @@ class RecentMedia : public QAbstractListModel
     Q_OBJECT
     Q_PROPERTY(int count READ count NOTIFY countChanged)
     Q_PROPERTY(bool enabled READ isEnabled WRITE setEnabled NOTIFY enabledChanged)
+    Q_PROPERTY(int revision READ revision NOTIFY revisionChanged)
 
 public:
     enum Role { UrlRole = Qt::UserRole + 1, TitleRole, DetailRole, PositionRole, LengthRole, ProgressRole, IsAudioRole, IsStreamRole, WhenRole };
@@ -29,6 +30,10 @@ public:
 
     /// Saved resume point for `url` in ms (0 when none or nearly finished).
     Q_INVOKABLE qint64 resumePosition(const QUrl &url) const;
+    /// Started but unfinished local files, most recent first:
+    /// [{url, title, position, length, progress, isAudio}]
+    Q_INVOKABLE QVariantList continueWatching(int limit) const;
+    int revision() const { return m_revision; }
 
 public slots:
     void touch(const QUrl &url);
@@ -39,6 +44,7 @@ public slots:
 signals:
     void countChanged();
     void enabledChanged();
+    void revisionChanged();
 
 private:
     struct Entry
@@ -54,6 +60,7 @@ private:
 
     QVector<Entry> m_entries;
     bool m_enabled = true;
+    int m_revision = 0;
 };
 
 } // namespace pulse

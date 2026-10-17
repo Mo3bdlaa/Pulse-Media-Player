@@ -19,12 +19,12 @@
 | 03 Audio Player | `qml/player/PlayerScreen.qml` (audio mode) |
 | 04 Playback Queue | `qml/screens/QueueScreen.qml`, `qml/player/QueueList.qml` |
 | 05 Playback Tools | `qml/player/ToolsPanel.qml` |
-| 06 Media Library | `qml/screens/PlannedScreen.qml` (P2) |
-| 07 Media Details | `ToolsPanel` Info tab today; full screen with the Library (P2) |
-| 08 Playlists | `PlannedScreen` (P2) |
+| 06 Media Library | `qml/screens/LibraryScreen.qml`, `qml/library/*` |
+| 07 Media Details | `ToolsPanel` Info tab today; a full screen is next |
+| 08 Playlists | `qml/screens/PlaylistsScreen.qml`, `qml/playlists/*` |
 | 09 Network & Streams | `qml/screens/NetworkScreen.qml` (URL playback; discovery P3) |
 | 10 Settings | `qml/screens/SettingsScreen.qml` |
-| 11 Convert & Export | `PlannedScreen` (P3) |
+| 11 Convert & Export | `qml/screens/ConvertScreen.qml`, `qml/convert/*` |
 | 12 Expanded Now Playing | planned: P1, after frame thumbnails |
 | M1–M4 Phone | the same QML at compact width: `BottomNav`, bottom sheets |
 

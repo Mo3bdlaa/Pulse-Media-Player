@@ -4,7 +4,8 @@
 ┌──────────────────────────────── QML (qml/) ────────────────────────────────┐
 │ Main.qml: routes, entry rules, shortcuts, drag-and-drop                    │
 │ shell/  TitleBar · Sidebar · BottomNav · MiniPlayer · CommandPalette       │
-│ screens/ Home · Queue · Network · Settings · Planned (P2/P3 destinations)  │
+│ screens/ Home · Library · Playlists · Convert · Queue · Network · Settings │
+│ library/ playlists/ convert/  the parts of those three screens             │
 │ player/  PlayerScreen (video + audio) · Timeline · ToolsPanel · QueueList  │
 │ components/ PulseButton · IconButton · NavItem · PulseSlider · Segmented … │
 │ theme/Theme.qml  ← generated from design/tokens.json                       │
@@ -12,9 +13,11 @@
                 │ Qt properties / slots (import Pulse.Core) │
 ┌───────────────▼─────────── app services (src/app) ───────▼─────────────────┐
 │ PlayQueue · RecentMedia · Preferences (versioned) · MediaInput · Icons      │
+│ Library · Playlists · ConvertQueue ──(desktop)──▶ pulse-convert helper     │
 └───────────────┬────────────────────────────────────────────────────────────┘
 ┌───────────────▼────────── engine adapter (src/engine) ─────────────────────┐
 │ Engine (libvlc_instance) · Player (libvlc_media_player) · VideoOutput (GL) │
+│ ThumbnailProvider · MediaProbe (parser) · Transcoder (stream output)       │
 │ the only code that includes <vlc/vlc.h>                                    │
 └───────────────┬────────────────────────────────────────────────────────────┘
                 │ public libVLC 4 API
@@ -41,6 +44,14 @@
   mobile GLES alike, with no native child windows. The core letterboxes, crops
   and scales to the size the item reports, so aspect and crop work unchanged.
 
+* **`ThumbnailProvider`** serves `image://thumb/…`: frames and embedded covers
+  from the core's thumbnailer and parser, cached on disk.
+* **`MediaProbe`** parses local files in the background (duration, size,
+  codecs, tags) for the Library and Playlists.
+* **`Transcoder`** converts one file through the core's stream output
+  (`#transcode{…}:std{…}`). It takes a plain `TranscodeProfile`; the chain
+  syntax stays inside the adapter.
+
 Times are milliseconds in the adapter; libVLC 4 uses microseconds internally.
 
 ## App services
@@ -57,6 +68,30 @@ Times are milliseconds in the adapter; libVLC 4 uses microseconds internally.
   dropped `.srt` attaches to the current video.
 * **`IconProvider`** — `image://icon/<name>?color=…` recolours the stroke icons
   in `assets/icons`, the same set used on the design boards.
+* **`Library`** (06) — an index of folders the user adds, kept in one JSON
+  file. A background scan finds media; `MediaProbe` fills in durations,
+  resolutions and tags; file names give titles, years and episodes
+  (`mediainfo.cpp`). Items are sorted into Movies, TV Shows, Music and Other.
+  Files are never moved or changed; an unplugged drive keeps its items, marked
+  offline.
+* **`Playlists`** (08) — saved lists of files and addresses (never copies),
+  with M3U/M3U8 import and export.
+* **`ConvertQueue`** (11) — presets, a job queue and its history. Output goes
+  next to the source as `<name> (Pulse).<ext>` and never overwrites. Audio
+  already in the target codec is copied rather than re-encoded. On desktop
+  each job runs in the `pulse-convert` helper (`src/convert_main.cpp`), which
+  reports progress on stdout and removes its partial file if it is stopped
+  or the app goes away.
+
+### Known core issue
+
+VLC 4.0-dev's transcoder can read freed memory in
+`modules/stream_out/transcode/pcr_sync.c` (`vlc_pcr_sync_SignalFrameOutput`)
+when audio and video are both re-encoded. It is reproducible with plain libVLC
+calls and is not caused by Pulse. Pulse does not patch the core. It copies
+matching audio, which avoids the fault in the common case, and it isolates
+every job in the helper, so the fault fails only that job ("Try again with
+Keep Original Audio"). The fix arrives with the upstream sync.
 
 ## Entry rules (design.md §5.2)
 

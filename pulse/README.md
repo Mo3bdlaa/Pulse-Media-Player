@@ -20,7 +20,8 @@ Pulse-Media-Player/
 └── pulse/
     ├── design/                     tokens.json + the 17 design boards (source of truth)
     ├── src/engine/                 the ONLY code that calls libVLC (adapter)
-    ├── src/app/                    queue, recents, preferences, input, icons
+    ├── src/app/                    queue, recents, library, playlists, convert queue
+    ├── src/convert_main.cpp        pulse-convert: runs one conversion per process
     ├── qml/                        the UI: theme, components, shell, screens, player
     ├── assets/                     icons, provisional logo
     ├── tests/                      engine contract tests + queue tests
@@ -55,6 +56,9 @@ export LD_LIBRARY_PATH=$(dirname "$(find build-libvlc/install -name libvlc.so | 
 build-pulse/pulse                       # opens Home
 build-pulse/pulse ~/Videos/movie.mkv    # opens straight into playback
 ```
+
+`pulse-convert` is built and installed next to `pulse`; Convert uses it to run
+each job in its own process.
 
 `PULSE_VLC_ARGS` passes raw core options for debugging, e.g.
 `PULSE_VLC_ARGS="--verbose=2"`.

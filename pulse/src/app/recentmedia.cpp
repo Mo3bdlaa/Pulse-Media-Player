@@ -16,6 +16,30 @@ RecentMedia::RecentMedia(QObject *parent)
     : QAbstractListModel(parent)
 {
     load();
+    auto bump = [this] { ++m_revision; emit revisionChanged(); };
+    connect(this, &RecentMedia::countChanged, this, bump);
+    connect(this, &QAbstractItemModel::dataChanged, this, bump);
+    connect(this, &QAbstractItemModel::rowsMoved, this, bump);
+}
+
+QVariantList RecentMedia::continueWatching(int limit) const
+{
+    QVariantList out;
+    for (const Entry &e : m_entries) {
+        if (out.size() >= limit)
+            break;
+        if (!e.url.isLocalFile() || resumePosition(e.url) <= 0 || !MediaInput::exists(e.url))
+            continue;
+        out << QVariantMap{
+            { QStringLiteral("url"), e.url },
+            { QStringLiteral("title"), MediaInput::displayName(e.url) },
+            { QStringLiteral("position"), e.position },
+            { QStringLiteral("length"), e.length },
+            { QStringLiteral("progress"), double(e.position) / double(e.length) },
+            { QStringLiteral("isAudio"), MediaInput::isAudio(e.url) },
+        };
+    }
+    return out;
 }
 
 int RecentMedia::rowCount(const QModelIndex &parent) const

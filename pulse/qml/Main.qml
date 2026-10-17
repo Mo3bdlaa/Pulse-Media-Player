@@ -63,6 +63,24 @@ T.ApplicationWindow {
         }
     }
 
+    function playList(urls, start) {
+        if (urls.length === 0) return
+        Queue.setItems(urls, start)
+        navigate("player")
+    }
+    function convertUrls(urls) {
+        const n = Converter.addUrls(urls)
+        if (n > 0) { convertScreen.tab = "convert"; navigate("convert") }
+        toast.show(n === 0 ? qsTr("Only local files can be converted") : n === 1 ? qsTr("Added to Convert") : qsTr("Added %1 files to Convert").arg(n))
+    }
+
+    Connections {
+        target: Converter
+        function onJobFinished(name, ok, error) {
+            toast.show(ok ? qsTr("Converted %1").arg(name) : qsTr("Couldn’t convert %1").arg(name), "", !ok)
+        }
+    }
+
     Connections {
         target: Queue
         function onPlayRequested(address) {
@@ -114,6 +132,10 @@ T.ApplicationWindow {
         title: qsTr("Open folder")
         onAccepted: win.openUrls([selectedFolder], false)
     }
+    PlaylistPicker {
+        id: picker
+        onAdded: (name, count) => toast.show(count === 1 ? qsTr("Added to “%1”").arg(name) : qsTr("Added %1 items to “%2”").arg(count).arg(name))
+    }
     OpenUrlDialog { id: urlDialog; onAccepted: (address, enqueue) => win.openUrls([address], enqueue) }
     CommandPalette {
         id: palette
@@ -124,6 +146,10 @@ T.ApplicationWindow {
             { text: qsTr("Go to Home"), icon: "home", run: () => win.navigate("home") },
             { text: qsTr("Go to Now Playing"), icon: "music", run: () => win.navigate("player") },
             { text: qsTr("Show queue"), icon: "queue", run: () => win.navigate("queue") },
+            { text: qsTr("Library"), icon: "library", run: () => win.navigate("library") },
+            { text: qsTr("Playlists"), icon: "playlists", run: () => win.navigate("playlists") },
+            { text: qsTr("Save queue as playlist…"), icon: "playlists", run: () => { if (Queue.count > 0) picker.pick(Queue.urls()); else toast.show(qsTr("The queue is empty")) } },
+            { text: qsTr("Convert media…"), icon: "convert", run: () => win.navigate("convert") },
             { text: qsTr("Network and streams"), icon: "network", run: () => win.navigate("network") },
             { text: qsTr("Settings"), icon: "settings", run: () => win.navigate("settings") },
             { text: qsTr("Toggle fullscreen"), hint: "F", icon: "fullscreen", run: () => win.toggleFullscreen() },
@@ -198,32 +224,30 @@ T.ApplicationWindow {
                 QueueScreen { anchors.fill: parent; visible: win.route === "queue"; compact: win.compact }
                 NetworkScreen { anchors.fill: parent; visible: win.route === "network"; compact: win.compact; onPlay: (address, enqueue) => win.openUrls([address], enqueue) }
                 SettingsScreen { anchors.fill: parent; visible: win.route === "settings"; compact: win.compact }
-                PlannedScreen {
+                LibraryScreen {
                     anchors.fill: parent
                     visible: win.route === "library"
                     compact: win.compact
-                    title: qsTr("Library")
-                    phase: "P2"
-                    summary: qsTr("An optional index of folders you choose. Playing files never needs it.")
-                    points: [qsTr("Add folders explicitly; nothing is scanned without your say-so"), qsTr("Movies, TV, Music and Other, with search and sort"), qsTr("Continue watching from saved positions"), qsTr("Offline folders keep their items and can be located again")]
+                    onPlay: (urls, start) => win.playList(urls, start)
+                    onEnqueue: (urls) => win.openUrls(urls, true)
+                    onAddToPlaylist: (urls) => picker.pick(urls)
+                    onConvert: (urls) => win.convertUrls(urls)
                 }
-                PlannedScreen {
+                PlaylistsScreen {
+                    id: playlistsScreen
                     anchors.fill: parent
                     visible: win.route === "playlists"
                     compact: win.compact
-                    title: qsTr("Playlists")
-                    phase: "P2"
-                    summary: qsTr("Mixed audio and video playlists that point to files and addresses — never copies.")
-                    points: [qsTr("Save the current queue as a playlist"), qsTr("Import and export M3U / M3U8"), qsTr("Missing files stay listed and can be located")]
+                    onPlay: (urls, start) => win.playList(urls, start)
+                    onToast: (m) => toast.show(m)
                 }
-                PlannedScreen {
+                ConvertScreen {
+                    id: convertScreen
                     anchors.fill: parent
                     visible: win.route === "convert"
                     compact: win.compact
-                    title: qsTr("Convert & Export")
-                    phase: "P3"
-                    summary: qsTr("Make a copy in another format. Originals are never changed or deleted.")
-                    points: [qsTr("Presets validated against this build’s encoders"), qsTr("A job queue with progress, errors and cancel"), qsTr("Safe file names — never overwrites without asking")]
+                    onPlay: (address) => win.playList([address], 0)
+                    onToast: (m) => toast.show(m)
                 }
 
                 PlayerScreen {
@@ -278,7 +302,16 @@ T.ApplicationWindow {
     // Drop anywhere: media starts a queue, subtitles attach to the current video.
     DropArea {
         anchors.fill: parent
-        onDropped: (drop) => { if (drop.hasUrls) { win.openUrls(drop.urls, Player.hasMedia && (drop.modifiers & Qt.ShiftModifier)); drop.accept() } }
+        onDropped: (drop) => {
+            if (!drop.hasUrls) return
+            drop.accept()
+            if (win.route === "convert") convertScreen.addFiles(drop.urls)
+            else if (win.route === "playlists" && playlistsScreen.selectedId !== "") {
+                Playlists.addUrls(playlistsScreen.selectedId, drop.urls)
+                toast.show(qsTr("Added to “%1”").arg(playlistsScreen.current.name))
+            }
+            else win.openUrls(drop.urls, Player.hasMedia && (drop.modifiers & Qt.ShiftModifier))
+        }
         Rectangle {
             anchors.fill: parent
             anchors.margins: 12
@@ -287,7 +320,10 @@ T.ApplicationWindow {
             color: Qt.rgba(1, 0.416, 0.157, 0.08)
             border.width: 2
             border.color: Theme.accent
-            Label { anchors.centerIn: parent; role: "section"; text: qsTr("Drop to play — hold Shift to add to the queue") }
+            Label { anchors.centerIn: parent; role: "section"
+                text: win.route === "convert" ? qsTr("Drop to add to Convert")
+                    : win.route === "playlists" && playlistsScreen.selectedId !== "" ? qsTr("Drop to add to “%1”").arg(playlistsScreen.current.name)
+                    : qsTr("Drop to play — hold Shift to add to the queue") }
         }
     }
 

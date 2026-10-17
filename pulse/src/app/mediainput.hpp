@@ -32,6 +32,9 @@ public:
     Q_INVOKABLE static QString formatSize(qint64 bytes);
     Q_INVOKABLE static QString scheme(const QUrl &url);
     Q_INVOKABLE static QString picturesFolder();
+    /// The folder holding a local file, as a URL (Show in Folder).
+    Q_INVOKABLE static QUrl folderOf(const QUrl &url);
+    Q_INVOKABLE static QUrl localUrl(const QString &path);
     /// "2 hours ago", "Yesterday", "3 days ago", or a short date.
     Q_INVOKABLE static QString relativeTime(const QDateTime &when);
     /// Deletes cached frame thumbnails; they are regenerated on demand.
