@@ -4,6 +4,7 @@
 #pragma once
 
 #include <QObject>
+#include <QRect>
 #include <QUrl>
 #include <memory>
 
@@ -18,6 +19,18 @@ struct TranscodeProfile
     int videoKbps = 0; ///< 0 lets the encoder decide
     int audioKbps = 192;
     bool hardwareDecoding = true;
+
+    // Minimal editing (Edit & Export). The core applies one video filter per
+    // pass reliably, so crop plus rotate/flip runs as two passes.
+    qint64 startMs = 0;     ///< trim start; snaps back to the previous keyframe
+    qint64 endMs = 0;       ///< trim end; 0 = to the end
+    QRect crop;             ///< in source pixels; null = whole frame
+    QString transform;      ///< "", "90", "180", "270", "hflip", "vflip"
+    int sourceWidth = 0;    ///< required with crop or transform
+    int sourceHeight = 0;
+    bool noAudio = false;
+
+    bool edits() const { return startMs > 0 || endMs > 0 || !crop.isNull() || !transform.isEmpty() || noAudio; }
 };
 
 class Transcoder : public QObject
@@ -33,6 +46,9 @@ public:
     /// Stops the running job; `finished(false, …)` follows and the partial file is removed.
     void cancel();
     bool isRunning() const;
+
+    /// Two-pass edits write `<output>` + this first; it is removed afterwards.
+    static constexpr const char *intermediateSuffix() { return ".pulse-pass1.mkv"; }
 
 signals:
     void progress(double position, qint64 lengthMs);

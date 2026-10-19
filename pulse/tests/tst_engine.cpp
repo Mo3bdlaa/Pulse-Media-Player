@@ -122,6 +122,43 @@ private slots:
         QCOMPARE(player.equalizerAmps().size(), 10);
     }
 
+    void ultraVolumeRanges()
+    {
+        Player player;
+        player.setVolume(260);
+        QCOMPARE(player.volume(), 200);
+        player.setBoost(20);
+        QCOMPARE(player.boost(), 12.0);
+        player.setBoost(-3);
+        QCOMPARE(player.boost(), 0.0);
+        player.open(m_wav);
+        QTRY_COMPARE_WITH_TIMEOUT(player.state(), Player::Playing, 10000);
+        player.setBoost(6); // applies through the equalizer while playing
+        QCOMPARE(player.boost(), 6.0);
+    }
+
+    void trimsToTheRequestedRange()
+    {
+        TranscodeProfile p;
+        p.container = QStringLiteral("mp3");
+        p.videoCodec = QStringLiteral("none");
+        p.audioCodec = QStringLiteral("mp3");
+        p.startMs = 1000;
+        p.endMs = 2500;
+        const QString out = m_dir.filePath(QStringLiteral("trim.mp3"));
+        Transcoder t;
+        QSignalSpy done(&t, &Transcoder::finished);
+        QVERIFY(t.start(m_wav, out, p));
+        QVERIFY(done.wait(30000));
+        QVERIFY2(done.first().at(0).toBool(), qPrintable(done.first().at(1).toString()));
+        MediaProbe probe;
+        QSignalSpy probed(&probe, &MediaProbe::probed);
+        probe.probe(QUrl::fromLocalFile(out));
+        QVERIFY(probed.wait(10000));
+        const qint64 ms = probed.first().at(1).toMap().value(QStringLiteral("durationMs")).toLongLong();
+        QVERIFY2(ms > 1200 && ms < 1900, qPrintable(QString::number(ms)));
+    }
+
     void probesDurationAndCodec()
     {
         MediaProbe probe;

@@ -26,6 +26,7 @@
 | 10 Settings | `qml/screens/SettingsScreen.qml` |
 | 11 Convert & Export | `qml/screens/ConvertScreen.qml`, `qml/convert/*` |
 | 12 Expanded Now Playing | `qml/player/PlayerScreen.qml` (expanded mode), `NowPlayingPanel.qml` |
+| (not in the concept art) Edit & Export | `qml/screens/EditorScreen.qml`, `qml/editor/CropOverlay.qml` |
 | M1–M4 Phone | the same QML at compact width: `BottomNav`, bottom sheets |
 
 ## Visual direction (matches the concept art)

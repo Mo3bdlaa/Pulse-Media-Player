@@ -90,6 +90,7 @@ struct Player::Private
     bool eqEnabled = false;
     QVariantList eqAmps;
     double eqPreamp = 0.0;
+    double boost = 0.0; // dB added to the preamp ("Ultra Volume")
 
     QVariantList audioDevices;
     std::vector<std::shared_ptr<void>> keepAlive;
@@ -243,9 +244,25 @@ struct Player::Private
         emit q->adjustChanged();
     }
 
+    // The core copies the settings, so a temporary combines the user's
+    // equalizer with the boost without touching either.
     void applyEqualizer()
     {
-        libvlc_media_player_set_equalizer(mp, eqEnabled ? equalizer : nullptr);
+        if (!mp)
+            return;
+        if (!eqEnabled && boost <= 0.0) {
+            libvlc_media_player_set_equalizer(mp, nullptr);
+            return;
+        }
+        libvlc_equalizer_t *effective = libvlc_audio_equalizer_new();
+        const unsigned bands = libvlc_audio_equalizer_get_band_count();
+        if (eqEnabled)
+            for (unsigned i = 0; i < bands; ++i)
+                libvlc_audio_equalizer_set_amp_at_index(effective, libvlc_audio_equalizer_get_amp_at_index(equalizer, i), i);
+        const double pre = (eqEnabled ? double(libvlc_audio_equalizer_get_preamp(equalizer)) : 0.0) + boost;
+        libvlc_audio_equalizer_set_preamp(effective, float(qBound(-20.0, pre, 20.0)));
+        libvlc_media_player_set_equalizer(mp, effective);
+        libvlc_audio_equalizer_release(effective);
     }
 
     void readEqualizer()
@@ -498,6 +515,17 @@ int Player::equalizerPreset() const { return d->eqPreset; }
 bool Player::isEqualizerEnabled() const { return d->eqEnabled; }
 QVariantList Player::equalizerAmps() const { return d->eqAmps; }
 double Player::equalizerPreamp() const { return d->eqPreamp; }
+double Player::boost() const { return d->boost; }
+
+void Player::setBoost(double db)
+{
+    db = qBound(0.0, db, 12.0);
+    if (qFuzzyCompare(db + 1.0, d->boost + 1.0))
+        return;
+    d->boost = db;
+    d->applyEqualizer();
+    emit volumeChanged();
+}
 QVariantList Player::audioDevices() const { return d->audioDevices; }
 void *Player::nativeHandle() const { return d->mp; }
 void Player::keepAlive(std::shared_ptr<void> object) { d->keepAlive.push_back(std::move(object)); }
@@ -631,7 +659,7 @@ void Player::previousChapter()
 
 void Player::setVolume(int volume)
 {
-    volume = qBound(0, volume, 125);
+    volume = qBound(0, volume, 200);
     if (volume == d->volume)
         return;
     d->volume = volume;

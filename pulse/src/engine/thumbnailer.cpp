@@ -197,6 +197,7 @@ QQuickImageResponse *ThumbnailProvider::requestImageResponse(const QString &id, 
     const bool artwork = query.hasQueryItem(QStringLiteral("art"));
     const bool byTime = query.hasQueryItem(QStringLiteral("t"));
     const qint64 timeMs = query.queryItemValue(QStringLiteral("t")).toLongLong();
+    const bool precise = query.hasQueryItem(QStringLiteral("precise")); // editor preview: the exact frame
     const double pos = query.hasQueryItem(QStringLiteral("pos")) ? query.queryItemValue(QStringLiteral("pos")).toDouble() : 0.3;
     const int width = requestedSize.width() > 0 ? requestedSize.width() : 480;
     const int height = requestedSize.height() > 0 ? requestedSize.height() : width * 9 / 16;
@@ -209,7 +210,7 @@ QQuickImageResponse *ThumbnailProvider::requestImageResponse(const QString &id, 
 
     const QFileInfo fi(url.toLocalFile());
     const QByteArray key = (url.toString() + QString::number(fi.size()) + QString::number(fi.lastModified().toSecsSinceEpoch())
-                            + (artwork ? QStringLiteral("art") : byTime ? QStringLiteral("t%1").arg(timeMs) : QStringLiteral("p%1").arg(pos))
+                            + (artwork ? QStringLiteral("art") : byTime ? QStringLiteral("t%1%2").arg(timeMs).arg(precise ? "x" : "") : QStringLiteral("p%1").arg(pos))
                             + QStringLiteral("@%1x%2").arg(width).arg(height)).toUtf8();
     const QString cacheFile = cacheDir() + QLatin1Char('/')
         + QString::fromLatin1(QCryptographicHash::hash(key, QCryptographicHash::Sha1).toHex()) + QStringLiteral(".jpg");
@@ -269,7 +270,7 @@ QQuickImageResponse *ThumbnailProvider::requestImageResponse(const QString &id, 
         r.seek.value.time = libvlc_time_t(timeMs) * 1000;
     else
         r.seek.value.pos = pos;
-    r.seek.speed = libvlc_media_thumbnail_seek_fast;
+    r.seek.speed = precise ? libvlc_media_thumbnail_seek_precise : libvlc_media_thumbnail_seek_fast;
     r.hw_dec = false;
 
     auto *holder = new std::shared_ptr<Request>(req);

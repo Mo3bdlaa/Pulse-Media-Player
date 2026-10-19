@@ -31,7 +31,10 @@ class Player : public QObject
     Q_PROPERTY(bool pausable READ isPausable NOTIFY capabilitiesChanged)
     Q_PROPERTY(bool rateChangeable READ isRateChangeable NOTIFY capabilitiesChanged)
 
+    // Volume in percent, 0–200 (software gain above 100). Boost adds up to
+    // +12 dB on top through the equalizer's preamp: "Ultra Volume", ~8×.
     Q_PROPERTY(int volume READ volume WRITE setVolume NOTIFY volumeChanged)
+    Q_PROPERTY(double boost READ boost WRITE setBoost NOTIFY volumeChanged)
     Q_PROPERTY(bool muted READ isMuted WRITE setMuted NOTIFY volumeChanged)
     Q_PROPERTY(double rate READ rate WRITE setRate NOTIFY rateChanged)
 
@@ -160,6 +163,8 @@ public:
     void setEqualizerEnabled(bool enabled);
     QVariantList equalizerAmps() const;
     double equalizerPreamp() const;
+    double boost() const;
+    void setBoost(double db);
     void setEqualizerPreamp(double db);
 
     QVariantList audioDevices() const;

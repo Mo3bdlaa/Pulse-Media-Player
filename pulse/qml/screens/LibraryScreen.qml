@@ -17,6 +17,7 @@ Item {
     signal addToPlaylist(var urls)
     signal convert(var urls)
     signal showDetails(url url)
+    signal edit(url url)
 
     readonly property var categories: [
         { value: "all", text: qsTr("All"), name: qsTr("All Media"), icon: "library" },
@@ -56,6 +57,7 @@ Item {
         PulseMenuItem { text: qsTr("Add to Queue"); iconName: "queue"; onTriggered: root.enqueue([itemMenu.url]) }
         PulseMenuItem { text: qsTr("Add to Playlist…"); iconName: "playlists"; onTriggered: root.addToPlaylist([itemMenu.url]) }
         PulseMenuItem { text: qsTr("Convert…"); iconName: "convert"; onTriggered: root.convert([itemMenu.url]) }
+        PulseMenuItem { text: qsTr("Edit…"); iconName: "crop"; visible: !itemMenu.isAudio; height: visible ? implicitHeight : 0; onTriggered: root.edit(itemMenu.url) }
         PulseMenuItem { text: qsTr("Show in Folder"); iconName: "folder"; onTriggered: Qt.openUrlExternally(MediaInput.folderOf(itemMenu.url)) }
     }
     function openMenu(button, url, isAudio) {

@@ -17,6 +17,7 @@ T.ScrollView {
     signal enqueue(var urls)
     signal addToPlaylist(var urls)
     signal convert(var urls)
+    signal edit(url url)
 
     contentWidth: availableWidth
     T.ScrollBar.horizontal.policy: T.ScrollBar.AlwaysOff
@@ -53,6 +54,7 @@ T.ScrollView {
     PulseMenu {
         id: moreMenu
         PulseMenuItem { text: qsTr("Add to Playlist…"); iconName: "playlists"; onTriggered: root.addToPlaylist([root.url]) }
+        PulseMenuItem { text: qsTr("Edit & Export…"); iconName: "crop"; visible: !root.isAudio; height: visible ? implicitHeight : 0; onTriggered: root.edit(root.url) }
         PulseMenuItem { text: qsTr("Convert…"); iconName: "convert"; onTriggered: root.convert([root.url]) }
         PulseMenuItem { text: qsTr("Show in Folder"); iconName: "folder"; onTriggered: Qt.openUrlExternally(MediaInput.folderOf(root.url)) }
     }

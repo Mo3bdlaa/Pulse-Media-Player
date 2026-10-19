@@ -247,6 +247,48 @@ Rectangle {
                     visible: root.tab === "audio"
                     Layout.fillWidth: true
                     spacing: 14
+                    // Ultra Volume: software gain to 200%, then up to +12 dB boost.
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Section { Layout.fillWidth: true; text: qsTr("Ultra Volume") }
+                        Label {
+                            readonly property real factor: Player.volume / 100 * Math.pow(10, Player.boost / 20)
+                            text: qsTr("%1× normal").arg(factor.toFixed(factor < 10 ? 1 : 0))
+                            color: factor > 1.01 ? Theme.accentText : Theme.textSecondary
+                            font.pixelSize: 13
+                            font.weight: Font.DemiBold
+                        }
+                    }
+                    SliderRow { text: qsTr("Volume"); from: 0; to: 200; centered: false; suffix: "%"; value: Player.volume; onMoved: (v) => Player.volume = v }
+                    SliderRow { text: qsTr("Boost"); from: 0; to: 12; centered: false; suffix: " dB"; value: Player.boost; onMoved: (v) => Player.boost = v }
+                    Flow {
+                        Layout.fillWidth: true
+                        spacing: 6
+                        Repeater {
+                            model: [
+                                { text: qsTr("Normal"), volume: 100, boost: 0 },
+                                { text: qsTr("Loud"), volume: 150, boost: 0 },
+                                { text: qsTr("Louder"), volume: 200, boost: 6 },
+                                { text: qsTr("Max"), volume: 200, boost: 12 }
+                            ]
+                            delegate: PulseButton {
+                                required property var modelData
+                                implicitHeight: 32
+                                font.pixelSize: 12
+                                text: modelData.text
+                                active: Player.volume === modelData.volume && Math.round(Player.boost) === modelData.boost
+                                onClicked: { Player.volume = modelData.volume; Player.boost = modelData.boost; Player.muted = false }
+                            }
+                        }
+                    }
+                    Label {
+                        Layout.fillWidth: true
+                        visible: Player.boost > 0 || Player.volume > 150
+                        wrapMode: Text.WordWrap
+                        role: "meta"
+                        color: Theme.highlight
+                        text: qsTr("Very loud settings can distort. Lower Boost if you hear crackling. Boost resets when Pulse restarts.")
+                    }
                     Section { text: qsTr("Audio track") }
                     TrackChoice { tracks: Player.audioTracks; current: Player.currentAudioTrack; allowOff: true
                         onPick: (id) => Player.selectTrack(1, id); onOff: Player.disableTrack(1) }

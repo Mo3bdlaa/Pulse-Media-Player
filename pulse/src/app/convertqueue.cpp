@@ -85,6 +85,28 @@ QString etaText(qint64 secs)
     return ConvertQueue::tr("%1 h %2 min").arg(mins / 60).arg(mins % 60);
 }
 
+// "Trim 0:12–0:40, crop 1080×1080, rotate 90°, no audio"
+QString editSummary(const QVariantMap &e)
+{
+    QStringList parts;
+    const qint64 a = e.value(QStringLiteral("startMs")).toLongLong(), b = e.value(QStringLiteral("endMs")).toLongLong();
+    if (a > 0 || b > 0)
+        parts << ConvertQueue::tr("Trim %1–%2").arg(MediaInput::formatTime(a), b > 0 ? MediaInput::formatTime(b) : ConvertQueue::tr("end"));
+    const QVariantList c = e.value(QStringLiteral("crop")).toList();
+    if (c.size() == 4)
+        parts << ConvertQueue::tr("crop %1×%2").arg(c[2].toInt()).arg(c[3].toInt());
+    const QString t = e.value(QStringLiteral("transform")).toString();
+    if (t == QLatin1String("hflip"))
+        parts << ConvertQueue::tr("mirrored");
+    else if (t == QLatin1String("vflip"))
+        parts << ConvertQueue::tr("flipped");
+    else if (!t.isEmpty())
+        parts << ConvertQueue::tr("rotate %1°").arg(t);
+    if (e.value(QStringLiteral("noAudio")).toBool())
+        parts << ConvertQueue::tr("no audio");
+    return parts.join(QStringLiteral(", "));
+}
+
 QString detailFor(const ConvertJobs::Job &job)
 {
     QStringList parts;
@@ -102,6 +124,8 @@ QString detailFor(const ConvertJobs::Job &job)
         parts << (codec.isEmpty() ? q : QStringLiteral("%1 (%2)").arg(q, codec));
     else if (!codec.isEmpty())
         parts << codec;
+    if (!job.edit.isEmpty())
+        parts << editSummary(job.edit);
     return parts.join(QStringLiteral(" · "));
 }
 
@@ -218,8 +242,10 @@ ConvertQueue::~ConvertQueue()
         if (!m_helper->waitForFinished(3000))
             m_helper->kill();
         const int row = m_active->rowOf(m_currentId);
-        if (row >= 0)
+        if (row >= 0) {
             QFile::remove(m_active->jobs[row].output);
+            QFile::remove(m_active->jobs[row].output + QLatin1String(Transcoder::intermediateSuffix()));
+        }
     }
 }
 
@@ -282,6 +308,21 @@ int ConvertQueue::addUrls(const QList<QUrl> &urls)
         ++added;
     }
     return added;
+}
+
+void ConvertQueue::addEdit(const QUrl &url, const QVariantMap &edit, const QString &preset)
+{
+    if (!url.isLocalFile() || !QFileInfo::exists(url.toLocalFile()))
+        return;
+    ConvertJobs::Job j;
+    j.id = m_nextId++;
+    j.url = url;
+    j.preset = presetFor(preset)->id;
+    j.resolution = presetFor(preset)->height;
+    j.edit = edit;
+    m_active->append(j);
+    m_probe->probe(url);
+    startAll();
 }
 
 void ConvertQueue::applyProbe(const QUrl &url, const QVariantMap &info)
@@ -348,7 +389,7 @@ void ConvertQueue::startAll()
     runNext();
 }
 
-QString ConvertQueue::outputPathFor(const QUrl &url, const QString &preset) const
+QString ConvertQueue::outputPathFor(const QUrl &url, const QString &preset, bool edited) const
 {
     const Preset *p = presetFor(preset);
     QString ext = QString::fromLatin1(p->container);
@@ -359,7 +400,7 @@ QString ConvertQueue::outputPathFor(const QUrl &url, const QString &preset) cons
     if (!QFileInfo(dir).isWritable())
         dir = QStandardPaths::writableLocation(ext == QLatin1String("mp3") ? QStandardPaths::MusicLocation
                                                                            : QStandardPaths::MoviesLocation);
-    const QString base = src.completeBaseName() + QStringLiteral(" (Pulse)");
+    const QString base = src.completeBaseName() + (edited ? QStringLiteral(" (Edited)") : QStringLiteral(" (Pulse)"));
     QString path = QDir(dir).filePath(base + QLatin1Char('.') + ext);
     for (int n = 2; QFileInfo::exists(path); ++n)
         path = QDir(dir).filePath(QStringLiteral("%1 %2.%3").arg(base).arg(n).arg(ext));
@@ -409,8 +450,23 @@ void ConvertQueue::runNext()
     profile.videoKbps = videoKbps(height > 0 ? height : 1080, m_quality);
     profile.audioKbps = m_quality == QLatin1String("low") ? 128 : m_quality == QLatin1String("medium") ? 160 : 192;
     profile.hardwareDecoding = m_hw;
+    if (!j.edit.isEmpty()) {
+        const QVariantMap &e = j.edit;
+        profile.startMs = e.value(QStringLiteral("startMs")).toLongLong();
+        profile.endMs = e.value(QStringLiteral("endMs")).toLongLong();
+        profile.transform = e.value(QStringLiteral("transform")).toString();
+        profile.noAudio = e.value(QStringLiteral("noAudio")).toBool();
+        profile.sourceWidth = e.value(QStringLiteral("sourceWidth"), j.info.value(QStringLiteral("width"))).toInt();
+        profile.sourceHeight = e.value(QStringLiteral("sourceHeight"), j.info.value(QStringLiteral("height"))).toInt();
+        const QVariantList c = e.value(QStringLiteral("crop")).toList();
+        if (c.size() == 4)
+            profile.crop = QRect(c[0].toInt(), c[1].toInt(), c[2].toInt(), c[3].toInt());
+        // Edits keep the picture's pixels unless a size was picked.
+        if (j.resolution <= 0)
+            profile.maxHeight = 0;
+    }
 
-    j.output = outputPathFor(j.url, j.preset);
+    j.output = outputPathFor(j.url, j.preset, !j.edit.isEmpty());
     j.status = QStringLiteral("converting");
     j.progress = 0;
     j.etaSecs = -1;
@@ -434,6 +490,18 @@ bool ConvertQueue::startHelper(const QUrl &input, const QString &output, const T
     };
     if (!p.hardwareDecoding)
         args << QStringLiteral("--no-hw");
+    if (p.startMs > 0)
+        args << QStringLiteral("--start-ms") << QString::number(p.startMs);
+    if (p.endMs > 0)
+        args << QStringLiteral("--end-ms") << QString::number(p.endMs);
+    if (!p.crop.isNull())
+        args << QStringLiteral("--crop") << QStringLiteral("%1,%2,%3,%4").arg(p.crop.x()).arg(p.crop.y()).arg(p.crop.width()).arg(p.crop.height());
+    if (!p.transform.isEmpty())
+        args << QStringLiteral("--transform") << p.transform;
+    if (p.sourceWidth > 0 && p.sourceHeight > 0)
+        args << QStringLiteral("--source-size") << QStringLiteral("%1x%2").arg(p.sourceWidth).arg(p.sourceHeight);
+    if (p.noAudio)
+        args << QStringLiteral("--no-audio");
     // Each handler works on its own process: the next job's helper may
     // already be running when the previous one finally exits.
     auto *proc = new QProcess(this);
@@ -449,6 +517,7 @@ bool ConvertQueue::startHelper(const QUrl &input, const QString &output, const T
         proc->deleteLater();
         if (!reported) {
             QFile::remove(output); // the helper stopped without finishing the file
+            QFile::remove(output + QLatin1String(Transcoder::intermediateSuffix()));
             onFinished(false, m_keepAudio ? tr("The converter stopped unexpectedly.")
                                           : tr("The converter stopped unexpectedly. Try again with “Keep Original Audio”."));
         }

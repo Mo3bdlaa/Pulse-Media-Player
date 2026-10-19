@@ -45,6 +45,7 @@ public:
         QString output;
         QDateTime finished;
         QVariantMap info; ///< from MediaProbe
+        QVariantMap edit; ///< Edit & Export: startMs, endMs, crop [x,y,w,h], transform, noAudio, sourceWidth, sourceHeight
         QElapsedTimer clock;
     };
 
@@ -109,6 +110,8 @@ public:
 
     /// Queues local media files with the selected preset; returns how many were added.
     Q_INVOKABLE int addUrls(const QList<QUrl> &urls);
+    /// Queues an edited copy of `url` (see Job::edit) and starts the queue.
+    Q_INVOKABLE void addEdit(const QUrl &url, const QVariantMap &edit, const QString &preset);
     Q_INVOKABLE void setJobPreset(int row, const QString &preset);
     Q_INVOKABLE void setJobResolution(int row, int height);
     Q_INVOKABLE void removeJob(int row);
@@ -119,7 +122,7 @@ public:
     Q_INVOKABLE void clearCompleted();
     Q_INVOKABLE static QString presetName(const QString &id);
     /// The output path for `url` with `preset`, without creating it.
-    Q_INVOKABLE QString outputPathFor(const QUrl &url, const QString &preset) const;
+    Q_INVOKABLE QString outputPathFor(const QUrl &url, const QString &preset, bool edited = false) const;
 
 signals:
     void runningChanged();

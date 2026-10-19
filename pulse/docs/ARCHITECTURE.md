@@ -89,6 +89,29 @@ Times are milliseconds in the adapter; libVLC 4 uses microseconds internally.
   reports progress on stdout and removes its partial file if it is stopped
   or the app goes away.
 
+### Edit & Export
+
+`EditorScreen` (trim, crop with aspect presets, quarter turns, mirror,
+remove audio) queues an edit job; `Transcoder` turns it into stream-output
+passes. Three behaviours of the VLC 4.0-dev transcoder shape this, all
+measured with plain libVLC calls:
+
+* **Only the first filter of a `vfilter` chain is applied.** So each pass
+  runs one filter, and crop plus turn or mirror runs as two passes (the
+  first into a high-bitrate intermediate that is deleted afterwards).
+* **`transform` alone only changes the orientation flag.** Pulse adds
+  `soverlay`, which makes the transcoder turn the pixels, and gives the
+  output size explicitly so quarter turns are not squeezed back into the
+  source shape.
+* **Trim starts at the keyframe before the start point.** The editor says so.
+
+### Ultra Volume
+
+`Player.volume` goes to 200 % (software gain). `Player.boost` adds 0–12 dB
+through the equalizer's preamp, combined with any equalizer preset in a
+temporary copy, so presets and boost never overwrite each other. Boost is
+not saved between launches on purpose.
+
 ### Known core issue
 
 VLC 4.0-dev's transcoder can read freed memory in

@@ -178,7 +178,10 @@ Rectangle {
                     text: MediaInput.formatTime(Player.time) + (Player.length > 0 ? "  /  " + MediaInput.formatTime(Player.length) : "") }
                 Item { Layout.fillWidth: true }
                 IconButton { visible: !root.compact; iconName: Player.muted || Player.volume === 0 ? "mute" : "volume"; label: Player.muted ? qsTr("Unmute") : qsTr("Mute"); size: 36; onClicked: Player.muted = !Player.muted }
-                PulseSlider { visible: !root.compact; Layout.preferredWidth: 110; from: 0; to: 125; value: Player.volume; Accessible.name: qsTr("Volume"); onMoved: Player.volume = value }
+                PulseSlider { visible: !root.compact; Layout.preferredWidth: 130; from: 0; to: 200; value: Player.volume; Accessible.name: qsTr("Volume"); onMoved: Player.volume = value }
+                Label { visible: !root.compact && (Player.volume > 100 || Player.boost > 0); font.pixelSize: 13; font.weight: Font.Bold; color: Theme.accentText
+                    text: Player.boost > 0 ? qsTr("BOOST") : Player.volume + "%"
+                    TapHandler { onTapped: root.openTools("audio") } }
                 Label { visible: Player.length > 0; font.pixelSize: 15; color: Theme.textEmphasis; text: "−" + MediaInput.formatTime(Player.length - Player.time) }
             }
             Item {
@@ -456,7 +459,9 @@ Rectangle {
                         visible: !root.compact && parent.width > 760
                         spacing: 8
                         IconButton { anchors.verticalCenter: parent.verticalCenter; iconName: Player.muted || Player.volume === 0 ? "mute" : "volume"; label: Player.muted ? qsTr("Unmute") : qsTr("Mute"); size: 40; onClicked: Player.muted = !Player.muted }
-                        PulseSlider { anchors.verticalCenter: parent.verticalCenter; width: 130; from: 0; to: 125; value: Player.volume; Accessible.name: qsTr("Volume"); onMoved: Player.volume = value }
+                        PulseSlider { anchors.verticalCenter: parent.verticalCenter; width: 150; from: 0; to: 200; value: Player.volume; Accessible.name: qsTr("Volume"); onMoved: Player.volume = value }
+                        Label { anchors.verticalCenter: parent.verticalCenter; visible: Player.volume > 100 || Player.boost > 0; font.pixelSize: 13; font.weight: Font.Bold; color: Theme.accentText
+                            text: Player.boost > 0 ? qsTr("BOOST") : Player.volume + "%" }
                     }
                 }
 

@@ -124,6 +124,7 @@ qt_add_qml_module(pulse
         qml/shell/Sidebar.qml
         qml/shell/TitleBar.qml
         qml/screens/ConvertScreen.qml
+        qml/screens/EditorScreen.qml
         qml/screens/HomeScreen.qml
         qml/screens/LibraryScreen.qml
         qml/screens/MediaDetailsScreen.qml
@@ -136,6 +137,7 @@ qt_add_qml_module(pulse
         qml/details/FactRow.qml
         qml/details/MediaFormat.qml
         qml/details/TrackRow.qml
+        qml/editor/CropOverlay.qml
         qml/library/EmptyLibrary.qml
         qml/library/LibraryOverview.qml
         qml/library/LibraryRow.qml

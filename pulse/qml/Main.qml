@@ -22,6 +22,8 @@ T.ApplicationWindow {
     property int resumeFrom: 0
     property double pendingStart: -1   // next playRequested starts here (ms) instead of the resume point
     property url detailsUrl
+    property url editorUrl
+    property string editorReturn: "library"
     property string detailsReturn: "library"
 
     width: 1280
@@ -53,6 +55,15 @@ T.ApplicationWindow {
         if (fullscreen) showNormal()
         detailsUrl = address
         navigate("details")
+    }
+    // Edit & Export for one local video.
+    function showEditor(address) {
+        if (!address.toString().startsWith("file:") || MediaInput.isAudio(address)) return
+        if (route !== "editor") editorReturn = route
+        if (fullscreen) showNormal()
+        if (Player.playing && Player.url.toString() === address.toString()) Player.togglePause()
+        editorUrl = address
+        navigate("editor")
     }
     function playAt(address, ms) {
         pendingStart = ms
@@ -179,6 +190,7 @@ T.ApplicationWindow {
             { text: qsTr("Playlists"), icon: "playlists", run: () => win.navigate("playlists") },
             { text: qsTr("Save queue as playlist…"), icon: "playlists", run: () => { if (Queue.count > 0) picker.pick(Queue.urls()); else toast.show(qsTr("The queue is empty")) } },
             { text: qsTr("Convert media…"), icon: "convert", run: () => win.navigate("convert") },
+            { text: qsTr("Edit current video…"), icon: "crop", run: () => { if (Player.hasVideo) win.showEditor(Player.url); else toast.show(qsTr("Play a video first")) } },
             { text: qsTr("Network and streams"), icon: "network", run: () => win.navigate("network") },
             { text: qsTr("Settings"), icon: "settings", run: () => win.navigate("settings") },
             { text: qsTr("Toggle fullscreen"), hint: "F", icon: "fullscreen", run: () => win.toggleFullscreen() },
@@ -262,6 +274,19 @@ T.ApplicationWindow {
                     onAddToPlaylist: (urls) => picker.pick(urls)
                     onConvert: (urls) => win.convertUrls(urls)
                     onShowDetails: (address) => win.showDetails(address)
+                    onEdit: (address) => win.showEditor(address)
+                }
+                EditorScreen {
+                    anchors.fill: parent
+                    visible: win.route === "editor"
+                    compact: win.compact
+                    url: win.editorUrl
+                    onBack: win.navigate(win.editorReturn)
+                    onExported: (name) => {
+                        convertScreen.tab = "queue"
+                        win.navigate("convert")
+                        toast.show(qsTr("Exporting an edited copy of %1").arg(name))
+                    }
                 }
                 MediaDetailsScreen {
                     anchors.fill: parent
@@ -273,6 +298,7 @@ T.ApplicationWindow {
                     onEnqueue: (urls) => win.openUrls(urls, true)
                     onAddToPlaylist: (urls) => picker.pick(urls)
                     onConvert: (urls) => win.convertUrls(urls)
+                    onEdit: (address) => win.showEditor(address)
                 }
                 PlaylistsScreen {
                     id: playlistsScreen
@@ -380,6 +406,8 @@ T.ApplicationWindow {
     Shortcut { sequence: "Left"; enabled: win.playerKeys; onActivated: { Player.seekBy(-Prefs.seekStepMs); playerScreen.wake() } }
     Shortcut { sequence: "Right"; enabled: win.playerKeys; onActivated: { Player.seekBy(Prefs.seekStepMs); playerScreen.wake() } }
     Shortcut { sequence: "Up"; enabled: win.playerKeys && win.route === "player"; onActivated: { Player.volume += 5; toast.show(qsTr("Volume %1%").arg(Player.volume)) } }
+    Shortcut { sequence: "Shift+Up"; enabled: win.playerKeys && win.route === "player"; onActivated: { Player.boost += 1; toast.show(qsTr("Boost +%1 dB").arg(Math.round(Player.boost))) } }
+    Shortcut { sequence: "Shift+Down"; enabled: win.playerKeys && win.route === "player"; onActivated: { Player.boost -= 1; toast.show(Player.boost > 0 ? qsTr("Boost +%1 dB").arg(Math.round(Player.boost)) : qsTr("Boost off")) } }
     Shortcut { sequence: "Down"; enabled: win.playerKeys && win.route === "player"; onActivated: { Player.volume -= 5; toast.show(qsTr("Volume %1%").arg(Player.volume)) } }
     Shortcut { sequence: "M"; enabled: win.playerKeys; onActivated: { Player.muted = !Player.muted; toast.show(Player.muted ? qsTr("Muted") : qsTr("Sound on")) } }
     Shortcut { sequence: "F"; enabled: win.route === "player"; onActivated: win.toggleFullscreen() }

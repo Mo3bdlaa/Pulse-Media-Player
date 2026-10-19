@@ -37,8 +37,10 @@ std::atomic<bool> g_complete{ false };
 void onTerminate(int)
 {
     // Leave no half-written file behind when the app cancels the job.
-    if (!g_complete && !g_partial.empty())
+    if (!g_complete && !g_partial.empty()) {
         std::remove(g_partial.c_str());
+        std::remove((g_partial + pulse::Transcoder::intermediateSuffix()).c_str()); // two-pass edits
+    }
     std::_Exit(2);
 }
 } // namespace
@@ -60,6 +62,12 @@ int main(int argc, char *argv[])
         { QStringLiteral("video-kbps"), QStringLiteral("Video bitrate."), QStringLiteral("kbps"), QStringLiteral("0") },
         { QStringLiteral("audio-kbps"), QStringLiteral("Audio bitrate."), QStringLiteral("kbps"), QStringLiteral("192") },
         { QStringLiteral("no-hw"), QStringLiteral("Decode in software.") },
+        { QStringLiteral("start-ms"), QStringLiteral("Trim: start."), QStringLiteral("ms"), QStringLiteral("0") },
+        { QStringLiteral("end-ms"), QStringLiteral("Trim: end (0 = to the end)."), QStringLiteral("ms"), QStringLiteral("0") },
+        { QStringLiteral("crop"), QStringLiteral("Crop rectangle in source pixels."), QStringLiteral("x,y,w,h") },
+        { QStringLiteral("transform"), QStringLiteral("90, 180, 270, hflip or vflip."), QStringLiteral("type") },
+        { QStringLiteral("source-size"), QStringLiteral("Source frame size, needed with crop or transform."), QStringLiteral("WxH") },
+        { QStringLiteral("no-audio"), QStringLiteral("Leave the audio out.") },
     });
     cli.process(app);
 
@@ -102,6 +110,16 @@ int main(int argc, char *argv[])
     profile.videoKbps = cli.value(QStringLiteral("video-kbps")).toInt();
     profile.audioKbps = cli.value(QStringLiteral("audio-kbps")).toInt();
     profile.hardwareDecoding = !cli.isSet(QStringLiteral("no-hw"));
+    profile.startMs = cli.value(QStringLiteral("start-ms")).toLongLong();
+    profile.endMs = cli.value(QStringLiteral("end-ms")).toLongLong();
+    profile.transform = cli.value(QStringLiteral("transform"));
+    profile.noAudio = cli.isSet(QStringLiteral("no-audio"));
+    if (const QStringList c = cli.value(QStringLiteral("crop")).split(QLatin1Char(',')); c.size() == 4)
+        profile.crop = QRect(c[0].toInt(), c[1].toInt(), c[2].toInt(), c[3].toInt());
+    if (const QStringList wh = cli.value(QStringLiteral("source-size")).split(QLatin1Char('x')); wh.size() == 2) {
+        profile.sourceWidth = wh[0].toInt();
+        profile.sourceHeight = wh[1].toInt();
+    }
 
     pulse::Transcoder transcoder;
     int last = -1;
