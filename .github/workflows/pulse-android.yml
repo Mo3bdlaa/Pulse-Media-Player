@@ -71,7 +71,7 @@ jobs:
         run: |
           pip install -q aqtinstall
           aqt install-qt linux desktop 6.8.3 linux_gcc_64 -O "$RUNNER_TEMP/Qt"
-          aqt install-qt linux android 6.8.3 ${{ matrix.qtarch }} -m qt5compat -O "$RUNNER_TEMP/Qt"
+          aqt install-qt linux android 6.8.3 ${{ matrix.qtarch }} -m qt5compat qtshadertools -O "$RUNNER_TEMP/Qt"
           echo "QT_ROOT_DIR=$RUNNER_TEMP/Qt/6.8.3/${{ matrix.qtarch }}" >> "$GITHUB_ENV"
       - name: Version
         run: |

@@ -61,7 +61,7 @@ jobs:
           host: windows
           target: desktop
           arch: win64_mingw
-          modules: "qt5compat"
+          modules: "qt5compat qtshadertools"
           tools: "tools_mingw1310 tools_ninja"
           cache: true
       - name: Put MinGW and Ninja on PATH
