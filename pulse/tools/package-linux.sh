@@ -39,7 +39,9 @@ install -Dm644 "$root/pulse/assets/logo/pulse-mark.svg" "$appdir/usr/share/icons
 # --- libVLC and its plugins ----------------------------------------------------
 libdir="$(dirname "$(find "$vlc" -name 'libvlc.so' | head -n1)")"
 mkdir -p "$appdir/usr/lib"
-cp -a "$libdir"/libvlc.so* "$libdir"/libvlccore.so* "$appdir/usr/lib/"
+# libvlc, libvlccore and the core's helper libraries (libvlc_pulse, libvlc_xcb_events, …).
+find "$libdir" -maxdepth 1 -name 'libvlc*.so*' -exec cp -a {} "$appdir/usr/lib/" \;
+find "$libdir/vlc" -maxdepth 1 -name 'libvlc*.so*' -exec cp -a {} "$appdir/usr/lib/" \; 2>/dev/null || true
 cp -a "$libdir/vlc" "$appdir/usr/lib/vlc"
 # The plugins cache speeds up the first start; build it when the tool exists.
 if [ -x "$libdir/vlc/vlc-cache-gen" ]; then
@@ -58,7 +60,9 @@ export QMAKE="${QMAKE:-$(command -v qmake6 || echo /usr/lib/qt6/bin/qmake)}"
 export EXTRA_QT_PLUGINS="svg;waylandcompositor"
 export EXTRA_PLATFORM_PLUGINS="libqwayland-egl.so;libqwayland-generic.so"
 export LDAI_OUTPUT="$out/Pulse-$version-$arch.AppImage"
-export LDAI_UPDATE_INFORMATION=""
+
+# linuxdeploy resolves dependencies through the loader path.
+export LD_LIBRARY_PATH="$appdir/usr/lib:$libdir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 plugins=()
 while IFS= read -r -d '' so; do plugins+=(--deploy-deps-only "$so"); done \

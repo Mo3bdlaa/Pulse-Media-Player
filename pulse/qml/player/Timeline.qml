@@ -182,12 +182,10 @@ Item {
         }
         Text {
             id: tip
-            anchors.horizontalCenter: Player.hasVideo ? undefined : parent.horizontalCenter
-            anchors.verticalCenter: Player.hasVideo ? undefined : parent.verticalCenter
-            anchors.left: Player.hasVideo ? parent.left : undefined
-            anchors.right: Player.hasVideo ? parent.right : undefined
-            anchors.bottom: Player.hasVideo ? parent.bottom : undefined
-            anchors.margins: 9
+            // Bottom-left over the frame (video), centred in the pill (audio).
+            x: Player.hasVideo ? 9 : (parent.width - width) / 2
+            y: Player.hasVideo ? parent.height - height - 9 : (parent.height - height) / 2
+            width: Player.hasVideo ? parent.width - 64 : implicitWidth
             text: (preview.chapter >= 0 ? root.chapters[preview.chapter].name + (Player.hasVideo ? "" : " · ") : "")
                   + (Player.hasVideo ? "" : MediaInput.formatTime(preview.ms))
             color: Theme.text
