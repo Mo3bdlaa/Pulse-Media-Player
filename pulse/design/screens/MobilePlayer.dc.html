@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pulse — Player on phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#111217}
+a{color:#FF8A4C}a:hover{color:#FFD166}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD166;outline-offset:2px}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #111217; color: #F7F4EF; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 8px; padding: 52px 8px 10px">
+    <a href="MobileHome.dc.html" aria-label="Back" style="width: 44px; height: 44px; border-radius: 22px; display: grid; place-items: center; color: #F7F4EF"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg></a>
+    <h1 style="flex: 1; margin: 0; font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Northern Lights Timelapse</h1>
+    <button aria-label="More options" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: transparent; display: grid; place-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.7"></circle><circle cx="12" cy="12" r="1.7"></circle><circle cx="12" cy="19" r="1.7"></circle></svg></button>
+  </header>
+
+  <div style="position: relative; height: 220px; background: radial-gradient(80% 70% at 30% 25%, rgba(59, 201, 160, 0.6) 0%, rgba(59, 201, 160, 0) 60%), radial-gradient(60% 60% at 78% 18%, rgba(110, 91, 216, 0.55) 0%, rgba(110, 91, 216, 0) 62%), radial-gradient(120% 70% at 50% 120%, #1B2433 0%, #0A0F18 55%), #05070C">
+    <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(5, 7, 12, 0.35)"></div>
+    <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: 28px">
+      <button aria-label="Back 10 seconds" style="width: 52px; height: 52px; border: 0; border-radius: 26px; background: rgba(17, 18, 23, 0.55); display: grid; place-items: center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5"></path><path d="M4 4v4.5h4.5"></path><text x="12.5" y="15.3" font-size="7" font-family="Inter, sans-serif" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">10</text></svg></button>
+      <button aria-label="Pause" style="width: 72px; height: 72px; border: 0; border-radius: 36px; background: #FF6A28; color: #111217; display: grid; place-items: center"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"></rect><rect x="14" y="4.5" width="4" height="15" rx="1.2"></rect></svg></button>
+      <button aria-label="Forward 10 seconds" style="width: 52px; height: 52px; border: 0; border-radius: 26px; background: rgba(17, 18, 23, 0.55); display: grid; place-items: center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.4-5.7L20 8.5"></path><path d="M20 4v4.5h-4.5"></path><text x="11.5" y="15.3" font-size="7" font-family="Inter, sans-serif" font-weight="700" text-anchor="middle" fill="currentColor" stroke="none">10</text></svg></button>
+    </div>
+  </div>
+
+  <div style="padding: 18px 20px 0; display: flex; flex-direction: column; gap: 8px">
+    <div role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="768" aria-valuenow="476" tabindex="0" style="position: relative; height: 24px; display: flex; align-items: center">
+      <div style="position: relative; width: 100%; height: 6px; border-radius: 3px; background: #2A2E39"><div style="width: 62%; height: 100%; border-radius: 3px; background: #FF6A28"></div><span style="position: absolute; left: calc(62% - 10px); top: -7px; width: 20px; height: 20px; border-radius: 10px; background: #F7F4EF"></span></div>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 13px; color: #AAAAB3; font-variant-numeric: tabular-nums"><span>7:56</span><span>−4:52</span></div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 14px 8px 0">
+    <a href="MobileTools.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0; color: #F7F4EF; text-decoration: none; font-size: 12px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M7 12h4M13 12h4M7 15.5h7"></path></svg>Subtitles</a>
+    <a href="MobileTools.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0; color: #F7F4EF; text-decoration: none; font-size: 12px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"></path></svg>Audio</a>
+    <a href="MobileTools.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0; color: #F7F4EF; text-decoration: none; font-size: 12px; font-weight: 500"><span style="height: 24px; display: grid; place-items: center"><span style="padding: 1px 6px; border-radius: 6px; border: 1.75px solid currentColor; font-size: 11px; font-weight: 700">1.0×</span></span>Speed</a>
+    <button style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0; border: 0; background: transparent; font-size: 12px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><rect x="12" y="11" width="7" height="6" rx="1" fill="currentColor" stroke="none"></rect></svg>PiP</button>
+    <button style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 0; border: 0; background: transparent; font-size: 12px; font-weight: 500"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"></path></svg>Landscape</button>
+  </div>
+
+  <div style="display: flex; align-items: center; justify-content: center; gap: 28px; padding: 14px 0 6px">
+    <button aria-label="Previous" style="width: 52px; height: 52px; border: 0; border-radius: 26px; background: #1F2430; display: grid; place-items: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M18 5v14l-10-7z" fill="currentColor"></path><path d="M6 5v14"></path></svg></button>
+    <button aria-label="Next" style="width: 52px; height: 52px; border: 0; border-radius: 26px; background: #1F2430; display: grid; place-items: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 5v14l10-7z" fill="currentColor"></path><path d="M18 5v14"></path></svg></button>
+  </div>
+
+  <a href="MobileQueue.dc.html" style="margin: auto 12px 30px; display: flex; flex-direction: column; gap: 10px; padding: 12px 14px 14px; border-radius: 18px; background: #1F2430; border: 1px solid #393944; color: #F7F4EF; text-decoration: none">
+    <span aria-hidden="true" style="align-self: center; width: 36px; height: 4px; border-radius: 2px; background: #393944"></span>
+    <span style="display: flex; align-items: center"><span style="flex: 1; font-size: 15px; font-weight: 700">Up next</span><span style="font-size: 13px; color: #FF8A4C; font-weight: 600">8 items</span></span>
+    <span style="display: flex; align-items: center; gap: 12px">
+      <span style="width: 72px; height: 40px; border-radius: 8px; background: radial-gradient(90% 80% at 30% 25%, #FFD166 0%, rgba(0,0,0,0) 55%), linear-gradient(170deg, #2A2E39, #0B0D12)"></span>
+      <span style="flex: 1; min-width: 0"><span style="display: block; font-size: 14px; font-weight: 600">Family Trip – Lisbon 2025.mov</span><span style="display: block; font-size: 12px; color: #AAAAB3">18:32</span></span>
+    </span>
+  </a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

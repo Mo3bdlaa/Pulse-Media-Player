@@ -1,0 +1,109 @@
+name: Pulse Windows
+
+# Builds the Windows app: libVLC from this tree with VideoLAN's toolchain
+# (tools/build-libvlc-windows.sh, on Linux), then Pulse with Qt's MinGW on a
+# Windows runner, packaged as a portable zip and an installer. Runs on pushes
+# that touch Pulse, and from the release workflow.
+
+on:
+  push:
+    paths:
+      - "pulse/**"
+      - "!pulse/packaging/release.txt"
+      - ".github/workflows/pulse-windows.yml"
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+
+jobs:
+  libvlc:
+    name: libVLC for Windows
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Key the cache on the upstream tree
+        id: core
+        run: echo "tree=$(git rev-parse HEAD:src HEAD:modules HEAD:lib HEAD:include HEAD:contrib HEAD:extras/package/win32 HEAD:configure.ac | sha256sum | cut -c1-16)-$(sha256sum pulse/tools/build-libvlc-windows.sh | cut -c1-8)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: build-libvlc-win64/install
+          key: libvlc-win64-${{ steps.core.outputs.tree }}
+      - name: Build libVLC (upstream win64 toolchain)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: pulse/tools/build-libvlc-windows.sh build-libvlc-win64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libvlc-win64
+          path: build-libvlc-win64/install
+          retention-days: 3
+
+  app:
+    name: Pulse for Windows
+    needs: libvlc
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: libvlc-win64
+          path: libvlc
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          host: windows
+          target: desktop
+          arch: win64_mingw
+          modules: "qt5compat qtshadertools"
+          tools: "tools_mingw1310 tools_ninja"
+          cache: true
+      - name: Put MinGW and Ninja on PATH
+        run: |
+          echo "$(cygpath -u "$IQTA_TOOLS")/mingw1310_64/bin" >> "$GITHUB_PATH"
+          echo "$(cygpath -u "$IQTA_TOOLS")/Ninja" >> "$GITHUB_PATH"
+      - name: Version
+        run: |
+          v="${{ inputs.version }}"; v="${v#v}"
+          [ -z "$v" ] && v="$(sed -n 's/^project(Pulse VERSION \([0-9.]*\).*/\1/p' pulse/CMakeLists.txt)-dev.${GITHUB_SHA::7}"
+          echo "VERSION=$v" >> "$GITHUB_ENV"
+      - name: Build Pulse
+        run: |
+          cmake -S pulse -B build-pulse -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
+            -DPULSE_LIBVLC_DIR="$PWD/libvlc/sdk"
+          cmake --build build-pulse
+      - name: Engine contract tests
+        run: |
+          # Qt's own MinGW runtime first: Git Bash ships a different libstdc++.
+          export PATH="$(cygpath -u "$QT_ROOT_DIR")/bin:$(cygpath -u "$IQTA_TOOLS")/mingw1310_64/bin:$PWD/libvlc:$PATH"
+          export PULSE_VLC_ARGS="--aout=adummy"
+          ctest --test-dir build-pulse --output-on-failure --timeout 300
+      - name: Package
+        id: package
+        run: pulse/tools/package-windows.sh libvlc build-pulse dist "$VERSION"
+      - name: Smoke test
+        shell: pwsh
+        run: |
+          $env:PULSE_VLC_ARGS = "--aout=adummy"
+          # A GUI-subsystem app logs to the debugger, not stderr, unless told to.
+          $env:QT_FORCE_STDERR_LOGGING = "1"
+          $p = Start-Process -FilePath dist\Pulse\pulse.exe -PassThru -RedirectStandardError smoke.log
+          Start-Sleep -Seconds 10
+          if ($p.HasExited) { Get-Content smoke.log; throw "pulse.exe exited early with code $($p.ExitCode)" }
+          Stop-Process -Id $p.Id -Force
+          Get-Content smoke.log -ErrorAction SilentlyContinue | Select-Object -Last 20
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
+        with:
+          name: pulse-windows
+          path: |
+            dist/*.zip
+            dist/*.exe
+            dist/*.sha256

@@ -1,0 +1,20 @@
+find_package(Qt6 REQUIRED COMPONENTS Test)
+
+add_executable(tst_engine tst_engine.cpp)
+target_link_libraries(tst_engine PRIVATE pulse_engine pulse_app Qt6::Test)
+if(TARGET pulse-convert)
+    target_compile_definitions(tst_engine PRIVATE PULSE_CONVERT_HELPER="$<TARGET_FILE:pulse-convert>")
+    add_dependencies(tst_engine pulse-convert)
+endif()
+add_test(NAME engine COMMAND tst_engine)
+set_tests_properties(engine PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+add_executable(tst_queue tst_queue.cpp)
+target_link_libraries(tst_queue PRIVATE pulse_app Qt6::Test)
+add_test(NAME queue COMMAND tst_queue)
+set_tests_properties(queue PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
+add_executable(tst_library tst_library.cpp)
+target_link_libraries(tst_library PRIVATE pulse_app Qt6::Test)
+add_test(NAME library COMMAND tst_library)
+set_tests_properties(library PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

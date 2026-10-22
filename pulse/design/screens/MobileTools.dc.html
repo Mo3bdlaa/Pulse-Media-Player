@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pulse — Playback tools sheet on phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#111217}
+a{color:#FF8A4C}a:hover{color:#FFD166}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid #FFD166;outline-offset:2px}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; background: #111217; color: #F7F4EF; font-family: Inter, system-ui, sans-serif">
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 106px; height: 220px; background: radial-gradient(80% 70% at 30% 25%, rgba(59, 201, 160, 0.6) 0%, rgba(59, 201, 160, 0) 60%), radial-gradient(60% 60% at 78% 18%, rgba(110, 91, 216, 0.55) 0%, rgba(110, 91, 216, 0) 62%), #0A0F18"></div>
+  <div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 52px; display: flex; align-items: center; padding: 0 16px; height: 44px; font-size: 16px; font-weight: 700; color: #AAAAB3">Northern Lights Timelapse</div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(5, 7, 12, 0.5)"></div>
+
+  <section role="dialog" aria-modal="true" aria-labelledby="sheet-h" style="position: absolute; left: 0; right: 0; bottom: 0; top: 330px; border-radius: 24px 24px 0 0; background: #1F2430; border-top: 1px solid #393944; display: flex; flex-direction: column">
+    <span aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: #393944; margin: 10px 0 6px"></span>
+    <div style="display: flex; align-items: center; padding: 4px 8px 10px 20px">
+      <h2 id="sheet-h" style="margin: 0; flex: 1; font-size: 18px; font-weight: 700">Playback tools</h2>
+      <a href="MobilePlayer.dc.html" aria-label="Close" style="width: 44px; height: 44px; border-radius: 22px; display: grid; place-items: center; color: #AAAAB3"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+    </div>
+    <div role="tablist" aria-label="Tool categories" style="margin: 0 16px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 3px; border-radius: 12px; background: #111217">
+      <button role="tab" aria-selected="false" style="height: 40px; border: 0; border-radius: 10px; background: transparent; color: #AAAAB3; font-size: 13px; font-weight: 600">Video</button>
+      <button role="tab" aria-selected="false" style="height: 40px; border: 0; border-radius: 10px; background: transparent; color: #AAAAB3; font-size: 13px; font-weight: 600">Audio</button>
+      <button role="tab" aria-selected="true" style="height: 40px; border: 0; border-radius: 10px; background: #2A2E39; font-size: 13px; font-weight: 700; box-shadow: inset 0 -2px 0 #FF6A28">Subtitles</button>
+      <button role="tab" aria-selected="false" style="height: 40px; border: 0; border-radius: 10px; background: transparent; color: #AAAAB3; font-size: 13px; font-weight: 600">Playback</button>
+    </div>
+
+    <div style="flex: 1; overflow: hidden; padding: 16px; display: flex; flex-direction: column; gap: 16px">
+      <div role="radiogroup" aria-label="Subtitle track" style="display: flex; flex-direction: column; gap: 6px">
+        <button role="radio" aria-checked="false" style="display: flex; align-items: center; gap: 14px; height: 52px; padding: 0 14px; border-radius: 12px; border: 1px solid #393944; background: transparent; text-align: left"><span style="width: 20px; height: 20px; border-radius: 10px; border: 2px solid #6B6F7C; box-sizing: border-box"></span><span style="flex: 1; font-size: 15px">Off</span></button>
+        <button role="radio" aria-checked="true" style="display: flex; align-items: center; gap: 14px; height: 52px; padding: 0 14px; border-radius: 12px; border: 1px solid #FF6A28; background: rgba(255, 106, 40, 0.1); text-align: left"><span style="width: 20px; height: 20px; border-radius: 10px; border: 6px solid #FF6A28; box-sizing: border-box"></span><span style="flex: 1; font-size: 15px; font-weight: 600">English</span><span style="font-size: 12px; color: #AAAAB3">SRT</span></button>
+        <button role="radio" aria-checked="false" style="display: flex; align-items: center; gap: 14px; height: 52px; padding: 0 14px; border-radius: 12px; border: 1px solid #393944; background: transparent; text-align: left"><span style="width: 20px; height: 20px; border-radius: 10px; border: 2px solid #6B6F7C; box-sizing: border-box"></span><span style="flex: 1; font-size: 15px">Norwegian</span><span style="font-size: 12px; color: #AAAAB3">Embedded</span></button>
+      </div>
+      <button style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 12px; border: 1.5px dashed #393944; background: transparent; font-size: 14px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Load from Files</button>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 14px; font-weight: 600">Sync</span>
+        <div style="display: flex; align-items: center; gap: 10px">
+          <button aria-label="Subtitles earlier" style="width: 52px; height: 48px; border-radius: 12px; border: 1px solid #393944; background: #2A2E39; font-size: 20px">−</button>
+          <span style="flex: 1; text-align: center; font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums">−0.4 s</span>
+          <button aria-label="Subtitles later" style="width: 52px; height: 48px; border-radius: 12px; border: 1px solid #393944; background: #2A2E39; font-size: 20px">+</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

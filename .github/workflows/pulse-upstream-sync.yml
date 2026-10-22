@@ -1,0 +1,97 @@
+name: Pulse upstream sync
+
+# Every day: merge the newest upstream VLC into a staging branch, run the full
+# Pulse CI against it, and fast-forward master only when everything is green.
+# Pulse never edits upstream files, so the merge itself cannot conflict; the CI
+# gate catches upstream libVLC API changes before they reach master.
+
+on:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: pulse-upstream-sync
+
+env:
+  STAGING: pulse/upstream-sync
+
+jobs:
+  merge:
+    name: Merge upstream into staging
+    runs-on: ubuntu-24.04
+    outputs:
+      changed: ${{ steps.sync.outputs.changed }}
+      upstream: ${{ steps.sync.outputs.upstream }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+      - id: sync
+        name: Merge upstream VLC
+        run: |
+          before=$(git rev-parse HEAD)
+          GIT_AUTHOR_NAME="pulse-upstream-sync[bot]" \
+          GIT_AUTHOR_EMAIL="pulse-upstream-sync@users.noreply.github.com" \
+          GIT_COMMITTER_NAME="pulse-upstream-sync[bot]" \
+          GIT_COMMITTER_EMAIL="pulse-upstream-sync@users.noreply.github.com" \
+            pulse/tools/sync-upstream.sh
+          echo "upstream=$(git rev-parse --short upstream/master)" >> "$GITHUB_OUTPUT"
+          if [ "$(git rev-parse HEAD)" = "$before" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git push --force origin "HEAD:refs/heads/$STAGING"
+          fi
+
+  verify:
+    name: Verify merged tree
+    needs: merge
+    if: needs.merge.outputs.changed == 'true'
+    uses: ./.github/workflows/pulse-ci.yml
+    with:
+      ref: pulse/upstream-sync
+
+  promote:
+    name: Fast-forward master
+    needs: [merge, verify]
+    if: needs.merge.outputs.changed == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.STAGING }}
+          fetch-depth: 0
+      - name: Push to master (fast-forward only)
+        run: |
+          git fetch origin master
+          git merge-base --is-ancestor origin/master HEAD
+          git push origin "HEAD:refs/heads/master"
+
+  report:
+    name: Report a blocked update
+    needs: [merge, verify]
+    if: failure() && needs.merge.outputs.changed == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Open or update a tracking issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          UPSTREAM: ${{ needs.merge.outputs.upstream }}
+        run: |
+          title="Upstream VLC update blocked"
+          body="Merging upstream VLC at \`$UPSTREAM\` builds or tests red: $RUN
+
+          The merged tree is on \`pulse/upstream-sync\`. Upstream files merge cleanly by design, so the fix belongs in \`pulse/src/engine\` (libVLC API change) or in the build options in \`pulse/tools/build-libvlc.sh\`. master stays on the last good upstream until this is green."
+          existing=$(gh issue list -R "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number -q '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" -R "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          fi

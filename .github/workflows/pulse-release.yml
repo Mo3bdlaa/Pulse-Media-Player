@@ -1,0 +1,137 @@
+name: Pulse Release
+
+# Builds the downloadable Pulse app and publishes it as a GitHub Release.
+# Push a tag such as v0.1.0, run this workflow by hand with a tag, or change
+# pulse/packaging/release.txt (one line: the tag) on any branch, and the
+# release appears under Releases with the AppImage and its checksum.
+
+on:
+  push:
+    tags: ["v*"]
+    branches: ["**"]
+    paths: ["pulse/packaging/release.txt"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to create or update (e.g. v0.1.0-alpha.1)
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pulse-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tag:
+    name: Release tag
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Choose the release tag
+        id: tag
+        run: |
+          tag="${{ inputs.tag }}"
+          [ -z "$tag" ] && [ "${{ github.ref_type }}" = tag ] && tag="${{ github.ref_name }}"
+          [ -z "$tag" ] && tag="$(head -n1 pulse/packaging/release.txt | tr -d '[:space:]')"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  linux:
+    name: Linux AppImage
+    needs: tag
+    runs-on: ubuntu-24.04
+    env:
+      TAG: ${{ needs.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends $(grep -v '^#' pulse/tools/release-deps.txt) xvfb libgl1-mesa-dri ffmpeg
+          pipx install 'meson>=1.10'
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Key libVLC cache on the upstream tree
+        id: core
+        run: echo "tree=$(git rev-parse HEAD:src HEAD:modules HEAD:lib HEAD:include HEAD:meson.build | sha256sum | cut -c1-16)-$(sha256sum pulse/tools/release-deps.txt pulse/tools/build-libvlc.sh | sha256sum | cut -c1-8)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: build-libvlc/install
+          key: libvlc-full-${{ runner.os }}-${{ steps.core.outputs.tree }}
+      - name: Build libVLC (full features) from this tree
+        run: |
+          if [ ! -f build-libvlc/install/lib/pkgconfig/libvlc.pc ]; then
+            pulse/tools/build-libvlc.sh build-libvlc --profile full
+          fi
+      - name: Build Pulse
+        run: |
+          export PKG_CONFIG_PATH="$PWD/build-libvlc/install/lib/pkgconfig"
+          cmake -S pulse -B build-pulse -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build-pulse
+      - name: Engine contract tests
+        run: |
+          export LD_LIBRARY_PATH="$PWD/build-libvlc/install/lib"
+          ctest --test-dir build-pulse --output-on-failure
+      - name: Package AppImage
+        run: pulse/tools/package-linux.sh build-libvlc/install build-pulse dist "${TAG#v}"
+      - name: Smoke test the AppImage
+        run: |
+          ffmpeg -loglevel error -f lavfi -i testsrc2=size=640x360:rate=25:duration=8 -f lavfi -i sine=duration=8 -c:v libx264 -c:a aac -shortest smoke.mp4
+          chmod +x dist/*.AppImage
+          APPIMAGE_EXTRACT_AND_RUN=1 PULSE_VLC_ARGS="--aout=adummy" xvfb-run -a -s "-screen 0 1280x800x24 +extension GLX" \
+            timeout --preserve-status -s INT 8 dist/Pulse-*.AppImage smoke.mp4 2>&1 | tee smoke.log || true
+          if grep -E "Aborted|Segmentation|failed to load component|not installed|cannot open shared object" smoke.log; then exit 1; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pulse-linux
+          path: |
+            dist/*.AppImage
+            dist/*.sha256
+
+  windows:
+    name: Windows
+    needs: tag
+    uses: ./.github/workflows/pulse-windows.yml
+    with:
+      version: ${{ needs.tag.outputs.tag }}
+
+  android:
+    name: Android
+    needs: tag
+    uses: ./.github/workflows/pulse-android.yml
+    with:
+      version: ${{ needs.tag.outputs.tag }}
+
+  publish:
+    name: Publish release
+    needs: [tag, linux, windows, android]
+    # Publish what was built even if one platform failed.
+    if: ${{ !cancelled() && (needs.linux.result == 'success' || needs.windows.result == 'success' || needs.android.result == 'success') }}
+    runs-on: ubuntu-24.04
+    env:
+      TAG: ${{ needs.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pulse-*
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          target_commitish: ${{ github.sha }}
+          name: Pulse ${{ env.TAG }}
+          body_path: pulse/packaging/RELEASE_NOTES.md
+          prerelease: ${{ contains(env.TAG, '-') }}
+          fail_on_unmatched_files: false
+          files: |
+            dist/*.AppImage
+            dist/*.zip
+            dist/*.exe
+            dist/*.apk
+            dist/*.sha256

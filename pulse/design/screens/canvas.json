@@ -1,0 +1,43 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-10-17T12:00:00Z"},
+  "title": "Pulse — Screen Designs",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Foundations.dc.html": {"x": 0, "y": 0, "w": 1440, "h": 1400, "title": "00 Foundations — Signal Ember"},
+    "Main.dc.html": {"x": 0, "y": 1760, "w": 1440, "h": 900, "title": "01 Welcome / Home", "expand": "fill", "is_interactive": true},
+    "VideoPlayer.dc.html": {"x": 1520, "y": 1760, "w": 1440, "h": 900, "title": "02 Video Player", "expand": "fill", "is_interactive": true},
+    "AudioPlayer.dc.html": {"x": 3040, "y": 1760, "w": 1440, "h": 900, "title": "03 Audio Player", "expand": "fill", "is_interactive": true},
+    "Queue.dc.html": {"x": 0, "y": 3020, "w": 1440, "h": 900, "title": "04 Playback Queue", "expand": "fill", "is_interactive": true},
+    "PlaybackTools.dc.html": {"x": 1520, "y": 3020, "w": 1440, "h": 900, "title": "05 Playback Tools", "expand": "fill", "is_interactive": true},
+    "Library.dc.html": {"x": 3040, "y": 3020, "w": 1440, "h": 900, "title": "06 Media Library", "expand": "fill", "is_interactive": true},
+    "MediaDetails.dc.html": {"x": 0, "y": 4280, "w": 1440, "h": 900, "title": "07 Media Details", "expand": "fill", "is_interactive": true},
+    "Playlists.dc.html": {"x": 1520, "y": 4280, "w": 1440, "h": 900, "title": "08 Playlists", "expand": "fill", "is_interactive": true},
+    "Network.dc.html": {"x": 3040, "y": 4280, "w": 1440, "h": 900, "title": "09 Network & Streams", "expand": "fill", "is_interactive": true},
+    "Settings.dc.html": {"x": 0, "y": 5540, "w": 1440, "h": 900, "title": "10 Settings", "expand": "fill", "is_interactive": true},
+    "Convert.dc.html": {"x": 1520, "y": 5540, "w": 1440, "h": 900, "title": "11 Convert & Export", "expand": "fill", "is_interactive": true},
+    "NowPlaying.dc.html": {"x": 3040, "y": 5540, "w": 1440, "h": 900, "title": "12 Expanded Now Playing", "expand": "fill", "is_interactive": true},
+    "MobileHome.dc.html": {"x": 0, "y": 6800, "w": 390, "h": 844, "title": "M1 Home — phone"},
+    "MobilePlayer.dc.html": {"x": 470, "y": 6800, "w": 390, "h": 844, "title": "M2 Player — phone"},
+    "MobileTools.dc.html": {"x": 940, "y": 6800, "w": 390, "h": 844, "title": "M3 Playback Tools sheet — phone"},
+    "MobileQueue.dc.html": {"x": 1410, "y": 6800, "w": 390, "h": 844, "title": "M4 Up Next — phone"}
+  },
+  "order": [
+    "Foundations.dc.html",
+    "Main.dc.html", "VideoPlayer.dc.html", "AudioPlayer.dc.html",
+    "Queue.dc.html", "PlaybackTools.dc.html", "Library.dc.html",
+    "MediaDetails.dc.html", "Playlists.dc.html", "Network.dc.html",
+    "Settings.dc.html", "Convert.dc.html", "NowPlaying.dc.html",
+    "MobileHome.dc.html", "MobilePlayer.dc.html", "MobileTools.dc.html", "MobileQueue.dc.html"
+  ],
+  "notes": {
+    "t_found": {"x": 0, "y": -280, "text": "Foundations — tokens & components", "kind": "title1", "maxW": 1440},
+    "t_play": {"x": 0, "y": 1480, "text": "P0 — Play: Home, Video, Audio", "kind": "title1", "maxW": 4480},
+    "t_power": {"x": 0, "y": 2740, "text": "P1/P2 — Queue, Tools, Library", "kind": "title1", "maxW": 4480},
+    "t_org": {"x": 0, "y": 4000, "text": "P2/P3 — Details, Playlists, Network", "kind": "title1", "maxW": 4480},
+    "t_util": {"x": 0, "y": 5260, "text": "Settings, Convert, Now Playing", "kind": "title1", "maxW": 4480},
+    "t_mobile": {"x": 0, "y": 6520, "text": "Phone — same language, touch model", "kind": "title1", "maxW": 1800}
+  },
+  "designSystems": []
+}

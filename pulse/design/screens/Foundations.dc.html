@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pulse — Foundations</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#111217}
+a{color:#FF8A4C}a:hover{color:#FFD166}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+</style>
+</helmet>
+<div style="width: 1440px; height: 1400px; box-sizing: border-box; padding: 56px 64px; background: #111217; color: #F7F4EF; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column; gap: 40px">
+
+  <div style="display: flex; align-items: flex-end; gap: 40px">
+    <div style="display: flex; align-items: center; gap: 18px">
+      <svg width="75" height="60" viewBox="0 0 30 24" aria-hidden="true"><path d="M4 4.6c0-1.2 1.3-1.9 2.3-1.3l10.6 7.4c.9.6.9 1.9 0 2.6L6.3 20.7c-1 .6-2.3-.1-2.3-1.3z" fill="#FF6A28"></path><path d="M19.5 4.5l7 7.5-7 7.5" fill="none" stroke="#FFD166" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span style="font-size: 40px; font-weight: 700; letter-spacing: 0.32em">PULSE</span>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 4px; padding-bottom: 6px">
+      <span style="font-size: 13px; font-weight: 700; letter-spacing: 0.24em; color: #AAAAB3">PLAY ANYTHING. FEEL MORE.</span>
+      <span style="font-size: 14px; color: #AAAAB3">Signal Ember · one language for desktop and phone · source of truth for the QML theme</span>
+    </div>
+    <div style="display: flex; gap: 14px; align-items: center">
+      <span style="width: 64px; height: 64px; border-radius: 16px; background: #1F2430; display: grid; place-items: center"><svg width="36" height="29" viewBox="0 0 30 24" aria-hidden="true"><path d="M4 4.6c0-1.2 1.3-1.9 2.3-1.3l10.6 7.4c.9.6.9 1.9 0 2.6L6.3 20.7c-1 .6-2.3-.1-2.3-1.3z" fill="#FF6A28"></path><path d="M19.5 4.5l7 7.5-7 7.5" fill="none" stroke="#FFD166" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+      <span style="width: 64px; height: 64px; border-radius: 16px; background: #F7F4EF; display: grid; place-items: center"><svg width="36" height="29" viewBox="0 0 30 24" aria-hidden="true"><path d="M4 4.6c0-1.2 1.3-1.9 2.3-1.3l10.6 7.4c.9.6.9 1.9 0 2.6L6.3 20.7c-1 .6-2.3-.1-2.3-1.3z" fill="#E4551A"></path><path d="M19.5 4.5l7 7.5-7 7.5" fill="none" stroke="#C98A00" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+      <span style="width: 64px; height: 64px; border-radius: 16px; background: #1F2430; display: grid; place-items: center"><svg width="36" height="29" viewBox="0 0 30 24" aria-hidden="true"><path d="M4 4.6c0-1.2 1.3-1.9 2.3-1.3l10.6 7.4c.9.6.9 1.9 0 2.6L6.3 20.7c-1 .6-2.3-.1-2.3-1.3z" fill="#F7F4EF"></path><path d="M19.5 4.5l7 7.5-7 7.5" fill="none" stroke="#F7F4EF" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+      <span style="width: 24px; height: 24px; display: grid; place-items: center"><svg width="24" height="19" viewBox="0 0 30 24" aria-hidden="true"><path d="M4 4.6c0-1.2 1.3-1.9 2.3-1.3l10.6 7.4c.9.6.9 1.9 0 2.6L6.3 20.7c-1 .6-2.3-.1-2.3-1.3z" fill="#FF6A28"></path><path d="M19.5 4.5l7 7.5-7 7.5" fill="none" stroke="#FFD166" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+      <span style="width: 16px; height: 16px; display: grid; place-items: center"><svg width="16" height="13" viewBox="0 0 30 24" aria-hidden="true"><path d="M4 4.6c0-1.2 1.3-1.9 2.3-1.3l10.6 7.4c.9.6.9 1.9 0 2.6L6.3 20.7c-1 .6-2.3-.1-2.3-1.3z" fill="#FF6A28"></path><path d="M19.5 4.5l7 7.5-7 7.5" fill="none" stroke="#FFD166" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+    </div>
+  </div>
+
+  <section aria-labelledby="col" style="display: flex; flex-direction: column; gap: 14px">
+    <h2 id="col" style="margin: 0; font-size: 20px; font-weight: 700">Color tokens</h2>
+    <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px">
+      <sc-for list="{{colors}}" as="c" hint-placeholder-count="16">
+        <div style="display: flex; flex-direction: column; gap: 8px">
+          <span style="{{c.swatch}}"></span>
+          <span style="font-size: 13px; font-weight: 600">{{c.name}}</span>
+          <span style="font-size: 12px; color: #AAAAB3; margin-top: -6px">{{c.hex}} · {{c.role}}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px">
+    <section aria-labelledby="typ" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 id="typ" style="margin: 0 0 4px; font-size: 20px; font-weight: 700">Type · Inter</h2>
+      <div style="display: flex; align-items: baseline; gap: 14px"><span style="width: 92px; font-size: 12px; color: #AAAAB3">Display 44/800</span><span style="font-size: 44px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1">Play</span></div>
+      <div style="display: flex; align-items: baseline; gap: 14px"><span style="width: 92px; font-size: 12px; color: #AAAAB3">Title 32/800</span><span style="font-size: 32px; font-weight: 800; letter-spacing: -0.01em">Library</span></div>
+      <div style="display: flex; align-items: baseline; gap: 14px"><span style="width: 92px; font-size: 12px; color: #AAAAB3">Section 20/700</span><span style="font-size: 20px; font-weight: 700">Recent files</span></div>
+      <div style="display: flex; align-items: baseline; gap: 14px"><span style="width: 92px; font-size: 12px; color: #AAAAB3">Body 14/500</span><span style="font-size: 14px; font-weight: 500">Northern Lights Timelapse.mp4</span></div>
+      <div style="display: flex; align-items: baseline; gap: 14px"><span style="width: 92px; font-size: 12px; color: #AAAAB3">Meta 12/500</span><span style="font-size: 12px; color: #AAAAB3">MP4 · 1.8 GB · 2 hours ago</span></div>
+      <div style="display: flex; align-items: baseline; gap: 14px"><span style="width: 92px; font-size: 12px; color: #AAAAB3">Wordmark</span><span style="font-size: 15px; font-weight: 700; letter-spacing: 0.32em">PULSE</span></div>
+      <p style="margin: 4px 0 0; font-size: 12px; line-height: 1.5; color: #AAAAB3">Times and counters use tabular figures. Phone display drops to 30.</p>
+    </section>
+
+    <section aria-labelledby="sp" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 id="sp" style="margin: 0 0 4px; font-size: 20px; font-weight: 700">Space · radius · motion</h2>
+      <div style="display: flex; align-items: flex-end; gap: 10px">
+        <sc-for list="{{spaces}}" as="s" hint-placeholder-count="7">
+          <span style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="{{s.box}}"></span><span style="font-size: 11px; color: #AAAAB3">{{s.v}}</span></span>
+        </sc-for>
+      </div>
+      <div style="display: flex; gap: 14px; margin-top: 8px">
+        <span style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="width: 56px; height: 40px; border-radius: 8px; background: #2A2E39; border: 1px solid #393944"></span><span style="font-size: 11px; color: #AAAAB3">8 controls</span></span>
+        <span style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="width: 56px; height: 40px; border-radius: 12px; background: #2A2E39; border: 1px solid #393944"></span><span style="font-size: 11px; color: #AAAAB3">12 cards</span></span>
+        <span style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="width: 56px; height: 40px; border-radius: 16px; background: #2A2E39; border: 1px solid #393944"></span><span style="font-size: 11px; color: #AAAAB3">16 panels</span></span>
+        <span style="display: flex; flex-direction: column; align-items: center; gap: 6px"><span style="width: 56px; height: 40px; border-radius: 24px 24px 0 0; background: #2A2E39; border: 1px solid #393944"></span><span style="font-size: 11px; color: #AAAAB3">24 sheets</span></span>
+      </div>
+      <dl style="margin: 8px 0 0; display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 6px 12px; font-size: 13px">
+        <dt style="color: #AAAAB3">Fast</dt><dd style="margin: 0">150 ms · hover, press, toggles</dd>
+        <dt style="color: #AAAAB3">Panel</dt><dd style="margin: 0">250 ms · drawers, sheets</dd>
+        <dt style="color: #AAAAB3">Controls hide</dt><dd style="margin: 0">after 3 s idle · fade 200 ms</dd>
+        <dt style="color: #AAAAB3">Touch target</dt><dd style="margin: 0">44 pt iOS · 48 dp Android · 44 px desktop</dd>
+      </dl>
+    </section>
+
+    <section aria-labelledby="st" style="display: flex; flex-direction: column; gap: 12px">
+      <h2 id="st" style="margin: 0 0 4px; font-size: 20px; font-weight: 700">States never rely on color alone</h2>
+      <div style="display: flex; flex-direction: column; gap: 4px; padding: 8px; border-radius: 12px; border: 1px solid #393944">
+        <span style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; font-size: 14px">Default</span>
+        <span style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; background: rgba(247, 244, 239, 0.06); color: #F7F4EF; font-size: 14px">Hover · raised tint</span>
+        <span style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #F7F4EF; font-size: 14px; outline: 2px solid #FFD166; outline-offset: -2px">Keyboard focus · gold ring</span>
+        <span style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; background: #2A2E39; box-shadow: inset 3px 0 0 #FF6A28; font-size: 14px; font-weight: 600">Selected · bar + weight</span>
+        <span style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #FF8A4C; font-size: 14px; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF6A28" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 10v6M10 6v12M14 9v8M18 12v3"></path></svg>Playing · meter icon</span>
+        <span style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #F7F4EF; opacity: 0.4; font-size: 14px">Disabled · 40%</span>
+        <span style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; opacity: 0.7; font-size: 14px">Unavailable <span style="color: #FF8A8F; font-size: 12px">File not found · Locate…</span></span>
+      </div>
+    </section>
+  </div>
+
+  <section aria-labelledby="cmp" style="display: flex; flex-direction: column; gap: 16px">
+    <h2 id="cmp" style="margin: 0; font-size: 20px; font-weight: 700">Components</h2>
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+      <button style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #FF6A28; color: #111217; font-size: 14px; font-weight: 700">Primary</button>
+      <button style="display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #393944; background: #1F2430; font-size: 14px; font-weight: 600">Secondary</button>
+      <button style="height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: transparent; color: #AAAAB3; font-size: 14px; font-weight: 600">Quiet</button>
+      <button style="height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #FF5A63; background: transparent; color: #FF8A8F; font-size: 14px; font-weight: 600">Destructive</button>
+      <button disabled style="height: 44px; padding: 0 20px; border: 0; border-radius: 10px; background: #FF6A28; color: #111217; font-size: 14px; font-weight: 700; opacity: 0.4; cursor: default">Disabled</button>
+      <button aria-label="Pause" style="width: 68px; height: 68px; border: 0; border-radius: 34px; background: #FF6A28; color: #111217; display: grid; place-items: center; box-shadow: 0 0 0 6px rgba(255, 106, 40, 0.22)"><svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="4.5" width="4" height="15" rx="1.2"></rect><rect x="14" y="4.5" width="4" height="15" rx="1.2"></rect></svg></button>
+      <button aria-label="Fullscreen" style="width: 44px; height: 44px; border: 0; border-radius: 22px; background: rgba(17, 18, 23, 0.55); display: grid; place-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4"></path></svg></button>
+      <a href="PlaybackTools.dc.html" style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: 10px; background: #1F2430; border: 1px solid #393944; color: #F7F4EF; text-decoration: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5"></rect><path d="M7 12h4M13 12h4M7 15.5h7"></path></svg><span style="display: flex; flex-direction: column; line-height: 1.15"><span style="font-size: 11px; color: #AAAAB3">Subtitles</span><span style="font-size: 13px; font-weight: 600">English (SRT)</span></span></a>
+      <kbd style="font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; background: #2A2E39; border: 1px solid #393944; border-radius: 6px; padding: 3px 8px">Space</kbd>
+      <span style="padding: 3px 8px; border-radius: 6px; border: 1px solid #FF6A28; color: #FF8A4C; font-size: 12px; font-weight: 700">FLAC</span>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 28px">
+      <div style="display: flex; flex-direction: column; gap: 8px; width: 280px">
+        <span style="font-size: 12px; color: #AAAAB3">Timeline · played, buffered, chapters, A–B</span>
+        <div aria-hidden="true" style="position: relative; height: 6px; border-radius: 3px; background: #393944"><div style="position: absolute; left: 0; top: 0; bottom: 0; width: 80%; border-radius: 3px; background: #4A4D59"></div><div style="position: absolute; left: 0; top: 0; bottom: 0; width: 55%; border-radius: 3px; background: #FF6A28"></div><span style="position: absolute; left: 30%; top: -2px; width: 2px; height: 10px; background: #111217"></span><span style="position: absolute; left: 70%; top: -2px; width: 2px; height: 10px; background: #111217"></span><span style="position: absolute; left: calc(55% - 9px); top: -6px; width: 18px; height: 18px; border-radius: 9px; background: #F7F4EF; box-shadow: 0 0 0 4px rgba(255, 106, 40, 0.45)"></span></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 12px; color: #AAAAB3">Switch</span>
+        <span style="display: flex; gap: 10px"><span style="position: relative; width: 44px; height: 26px; border-radius: 13px; background: #FF6A28"><span style="position: absolute; right: 3px; top: 3px; width: 20px; height: 20px; border-radius: 10px; background: #111217"></span></span><span style="position: relative; width: 44px; height: 26px; border-radius: 13px; background: #393944"><span style="position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 10px; background: #AAAAB3"></span></span></span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 12px; color: #AAAAB3">Segmented</span>
+        <span style="display: grid; grid-template-columns: repeat(3, 72px); padding: 3px; border-radius: 10px; background: #0B0C10"><span style="height: 34px; border-radius: 8px; background: #2A2E39; display: grid; place-items: center; font-size: 13px; font-weight: 600">Auto</span><span style="height: 34px; display: grid; place-items: center; font-size: 13px; color: #AAAAB3">Off</span><span style="height: 34px; display: grid; place-items: center; font-size: 13px; color: #AAAAB3">On</span></span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 12px; color: #AAAAB3">Toast</span>
+        <span role="status" style="display: flex; align-items: center; gap: 12px; padding: 10px 10px 10px 16px; border-radius: 12px; background: #1F2430; border: 1px solid #393944; font-size: 14px">Subtitle added<button style="height: 32px; padding: 0 12px; border: 1px solid #393944; border-radius: 8px; background: transparent; font-size: 13px; font-weight: 600">Undo</button></span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <span style="font-size: 12px; color: #AAAAB3">Error</span>
+        <span role="alert" style="display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 14px; border-radius: 12px; background: rgba(255, 90, 99, 0.12); border: 1px solid #FF5A63; font-size: 14px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FF8A8F" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5h.01"></path></svg>Couldn’t open this stream<button style="height: 32px; padding: 0 12px; border: 0; border-radius: 8px; background: #2A2E39; font-size: 13px; font-weight: 600">Retry</button></span>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1400}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const defs = [
+      ['bg', '#111217', 'app ground'],
+      ['surface', '#1F2430', 'cards, panels'],
+      ['surfaceRaised', '#2A2E39', 'selected, hover'],
+      ['sunken', '#0B0C10', 'tracks, wells'],
+      ['border', '#393944', 'dividers'],
+      ['text', '#F7F4EF', 'primary'],
+      ['textStrong2', '#D2D0CB', 'emphasis 2'],
+      ['textSecondary', '#AAAAB3', 'supporting'],
+      ['accent', '#FF6A28', 'action, progress'],
+      ['onAccent', '#111217', 'text on accent'],
+      ['accentText', '#FF8A4C', 'accent as text'],
+      ['highlight', '#FFD166', 'focus, A–B, tips'],
+      ['iconMuted', '#6B6F7C', 'handles, empty'],
+      ['error', '#FF5A63', 'error border'],
+      ['errorText', '#FF8A8F', 'error text'],
+      ['success', '#62C999', 'done, live']
+    ];
+    return {
+      colors: defs.map(([name, hex, role]) => ({
+        name: name, hex: hex, role: role,
+        swatch: 'height: 56px; border-radius: 10px; border: 1px solid #393944; background: ' + hex
+      })),
+      spaces: [4, 8, 12, 16, 24, 32, 48].map((v) => ({ v: String(v), box: 'width: ' + v + 'px; height: ' + v + 'px; border-radius: 3px; background: #FF6A28' }))
+    };
+  }
+}
+</script>
+</body>
+</html>

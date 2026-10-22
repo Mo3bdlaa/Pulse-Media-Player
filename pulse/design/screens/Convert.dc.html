@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pulse — Convert and Export</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#111217}
+a{color:#FF8A4C}a:hover{color:#FFD166}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #FFD166;outline-offset:2px}
+</style>
+</helmet>
+<div style="min-height: 900px; background: #111217; color: #F7F4EF; font-family: Inter, system-ui, sans-serif; display: flex; flex-direction: column">
+
+  <header style="display: flex; align-items: center; gap: 16px; height: 56px; padding: 0 8px 0 20px; border-bottom: 1px solid #393944">
+    <a href="Main.dc.html" aria-label="Pulse home" style="flex: 0 0 auto; display: flex; align-items: center; gap: 10px; text-decoration: none; color: #F7F4EF; width: 204px">
+      <svg width="30" height="24" viewBox="0 0 30 24" aria-hidden="true"><path d="M4 4.6c0-1.2 1.3-1.9 2.3-1.3l10.6 7.4c.9.6.9 1.9 0 2.6L6.3 20.7c-1 .6-2.3-.1-2.3-1.3z" fill="#FF6A28"></path><path d="M19.5 4.5l7 7.5-7 7.5" fill="none" stroke="#FFD166" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      <span style="font-size: 15px; font-weight: 700; letter-spacing: 0.32em">PULSE</span>
+    </a>
+    <label style="flex: 0 1 520px; margin: 0 auto; display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 12px; background: #1F2430; border: 1px solid #393944; border-radius: 8px; color: #AAAAB3">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+      <input type="search" aria-label="Search or run a command" placeholder="Search or type a command" style="flex: 1; min-width: 0; background: transparent; border: 0; font-size: 14px; color: #F7F4EF">
+      <kbd style="font-family: Inter, sans-serif; font-size: 12px; color: #AAAAB3; border: 1px solid #393944; border-radius: 6px; padding: 2px 6px">Ctrl K</kbd>
+    </label>
+    <div style="display: flex; gap: 2px; color: #AAAAB3">
+      <button aria-label="Minimize" style="width: 44px; height: 36px; border: 0; background: transparent; border-radius: 6px; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+      <button aria-label="Maximize" style="width: 44px; height: 36px; border: 0; background: transparent; border-radius: 6px; display: grid; place-items: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"></rect></svg></button>
+      <button aria-label="Close" style="width: 44px; height: 36px; border: 0; background: transparent; border-radius: 6px; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+    </div>
+  </header>
+
+  <div style="flex: 1; display: flex; flex-wrap: wrap">
+    <nav aria-label="Primary" style="flex: 1 1 232px; box-sizing: border-box; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; border-right: 1px solid #393944">
+      <a href="Main.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Home</a>
+      <a href="Library.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="18" rx="1.5"></rect><rect x="11" y="3" width="4" height="18" rx="1"></rect><path d="m17.5 4 3.5 16"></path></svg>Library</a>
+      <a href="Playlists.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h13M3 11h13M3 16h8"></path><path d="M16 14v6l5-3z" fill="currentColor"></path></svg>Playlists</a>
+      <a href="Network.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M2 9.5a14 14 0 0 1 20 0M5 12.8a9.5 9.5 0 0 1 14 0M8.2 16a5 5 0 0 1 7.6 0"></path><circle cx="12" cy="19.3" r="1.2" fill="currentColor"></circle></svg>Network</a>
+      <a href="Convert.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; background: #2A2E39; color: #F7F4EF; text-decoration: none; font-size: 14px; font-weight: 600; box-shadow: inset 3px 0 0 #FF6A28">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF6A28" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 8a8 8 0 0 0-14.5-2.5M4 3.5V8h4.5M4 16a8 8 0 0 0 14.5 2.5M20 20.5V16h-4.5"></path></svg>Convert</a>
+      <a href="Settings.dc.html" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 14px; border-radius: 8px; color: #AAAAB3; text-decoration: none; font-size: 14px; font-weight: 500">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3h3.4l.5 2.4 1.9 1.1 2.3-.8 1.7 2.9-1.8 1.6v2.2l1.8 1.6-1.7 2.9-2.3-.8-1.9 1.1-.5 2.4h-3.4l-.5-2.4-1.9-1.1-2.3.8-1.7-2.9 1.8-1.6v-2.2L3.9 8.6l1.7-2.9 2.3.8 1.9-1.1z"></path><circle cx="12" cy="12" r="3"></circle></svg>Settings</a>
+    </nav>
+
+    <main style="flex: 999 1 560px; min-width: 0; box-sizing: border-box; padding: 32px 40px 40px; display: flex; flex-direction: column; gap: 22px">
+      <div>
+        <h1 style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.01em">Convert &amp; Export</h1>
+        <p style="margin: 6px 0 0; font-size: 14px; color: #AAAAB3">Make a copy in another format. Your original files are never changed.</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+        <section aria-labelledby="s1" style="padding: 18px 20px; border-radius: 16px; background: #1F2430; border: 1px solid #393944; display: flex; flex-direction: column; gap: 12px">
+          <h2 id="s1" style="margin: 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px"><span style="width: 24px; height: 24px; border-radius: 12px; background: #FF6A28; color: #111217; display: grid; place-items: center; font-size: 12px; font-weight: 800">1</span>Source</h2>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; background: #2A2E39"><span style="width: 56px; height: 32px; border-radius: 6px; background: radial-gradient(90% 80% at 30% 20%, #E8590C 0%, rgba(0,0,0,0) 55%), linear-gradient(170deg, #2A1A12, #0B0D12)"></span><span style="flex: 1; min-width: 0"><span style="display: block; font-size: 13px; font-weight: 600">Concert Recording.mkv</span><span style="display: block; font-size: 12px; color: #AAAAB3">48:20 · 1080p H.264 · 2.4 GB</span></span><button aria-label="Remove Concert Recording" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: #AAAAB3; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></div>
+            <div style="display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; background: #2A2E39"><span style="width: 56px; height: 32px; border-radius: 6px; background: radial-gradient(90% 80% at 30% 20%, #FFD166 0%, rgba(0,0,0,0) 55%), linear-gradient(170deg, #2A2E39, #0B0D12)"></span><span style="flex: 1; min-width: 0"><span style="display: block; font-size: 13px; font-weight: 600">Family Trip – Lisbon 2025.mov</span><span style="display: block; font-size: 12px; color: #AAAAB3">18:32 · 4K ProRes · 31 GB</span></span><button aria-label="Remove Family Trip" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: #AAAAB3; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button></div>
+          </div>
+          <button style="display: flex; align-items: center; justify-content: center; gap: 8px; height: 44px; border-radius: 10px; border: 1.5px dashed #393944; background: transparent; font-size: 13px; font-weight: 600; color: #D2D0CB"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Add files or drop them here</button>
+        </section>
+
+        <section aria-labelledby="s2" style="padding: 18px 20px; border-radius: 16px; background: #1F2430; border: 1px solid #393944; display: flex; flex-direction: column; gap: 12px">
+          <h2 id="s2" style="margin: 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px"><span style="width: 24px; height: 24px; border-radius: 12px; background: #FF6A28; color: #111217; display: grid; place-items: center; font-size: 12px; font-weight: 800">2</span>Preset</h2>
+          <div role="radiogroup" aria-label="Output preset" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+            <sc-for list="{{presets}}" as="p" hint-placeholder-count="6">
+              <button role="radio" aria-checked="{{p.checked}}" onClick="{{p.pick}}" style="{{p.style}}"><span style="display: block; font-size: 13px; font-weight: 700">{{p.name}}</span><span style="display: block; font-size: 12px; color: #AAAAB3; margin-top: 2px">{{p.desc}}</span></button>
+            </sc-for>
+          </div>
+          <details style="font-size: 13px; color: #D2D0CB"><summary style="cursor: pointer; font-weight: 600">Codec options</summary><p style="margin: 8px 0 0; color: #AAAAB3">Video H.264 · CRF 20 · Audio AAC 192 kb/s · keep subtitles</p></details>
+        </section>
+
+        <section aria-labelledby="s3" style="padding: 18px 20px; border-radius: 16px; background: #1F2430; border: 1px solid #393944; display: flex; flex-direction: column; gap: 12px">
+          <h2 id="s3" style="margin: 0; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px"><span style="width: 24px; height: 24px; border-radius: 12px; background: #FF6A28; color: #111217; display: grid; place-items: center; font-size: 12px; font-weight: 800">3</span>Destination</h2>
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #D2D0CB">Save to
+            <span style="display: flex; gap: 8px"><input value="~/Videos/Converted" aria-label="Destination folder" style="flex: 1; min-width: 0; height: 40px; padding: 0 12px; border-radius: 8px; border: 1px solid #393944; background: #2A2E39; font-size: 13px"><button style="height: 40px; padding: 0 12px; border-radius: 8px; border: 1px solid #393944; background: transparent; font-size: 13px; font-weight: 600">Browse</button></span></label>
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #D2D0CB">File name
+            <input value="{name} (converted).mp4" aria-label="File name pattern" style="height: 40px; padding: 0 12px; border-radius: 8px; border: 1px solid #393944; background: #2A2E39; font-size: 13px"></label>
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #D2D0CB">If the file exists
+            <select style="height: 40px; padding: 0 10px; border-radius: 8px; border: 1px solid #393944; background: #2A2E39; font-size: 13px"><option>Add a number — never overwrite</option><option>Ask me</option></select></label>
+          <button style="margin-top: auto; display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; border: 0; border-radius: 10px; background: #FF6A28; color: #111217; font-size: 14px; font-weight: 700">Convert 2 files</button>
+        </section>
+      </div>
+
+      <section aria-labelledby="jobs" style="display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: center"><h2 id="jobs" style="margin: 0; font-size: 18px; font-weight: 700; flex: 1">Jobs</h2><button style="height: 32px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: #AAAAB3; font-size: 13px; font-weight: 600">Clear finished</button></div>
+        <div style="border-radius: 12px; background: #1F2430; border: 1px solid #393944">
+          <sc-for list="{{jobs}}" as="j" hint-placeholder-count="4">
+            <div style="{{j.rowStyle}}">
+              <span style="flex: 1 1 260px; min-width: 0"><span style="display: block; font-size: 14px; font-weight: 600">{{j.name}}</span><span style="display: block; font-size: 12px; color: #AAAAB3">{{j.preset}}</span></span>
+              <span style="flex: 1 1 240px; display: flex; flex-direction: column; gap: 6px">
+                <span style="height: 6px; border-radius: 3px; background: #393944"><span style="{{j.bar}}"></span></span>
+                <span style="{{j.statusStyle}}">{{j.status}}</span>
+              </span>
+              <button style="height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid #393944; background: transparent; font-size: 13px; font-weight: 600">{{j.action}}</button>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { preset: 0 };
+  }
+  renderVals() {
+    const sel = this.state.preset;
+    const defs = [['MP4 · H.264', 'Plays almost anywhere'], ['MKV · HEVC', 'Smaller, high quality'], ['Web · 1080p', 'For sharing online'], ['Phone · 720p', 'Small and quick'], ['Audio · MP3', 'Extract the soundtrack'], ['Custom', 'Choose codecs']];
+    const presets = defs.map(([name, desc], i) => ({
+      name: name, desc: desc, checked: i === sel ? 'true' : 'false',
+      pick: () => this.setState({ preset: i }),
+      style: 'padding: 10px 12px; border-radius: 10px; text-align: left; ' + (i === sel ? 'border: 1px solid #FF6A28; background: rgba(255, 106, 40, 0.1)' : 'border: 1px solid #393944; background: transparent')
+    }));
+    const jobs = [
+      ['Lecture 07 – Signals and Systems.mkv', 'MP4 · H.264 → ~/Videos/Converted', 45, 'Converting · 45% · about 6 min left', 'Cancel', '#FF6A28', '#D2D0CB'],
+      ['Drone – Coastline.mp4', 'Phone · 720p', 0, 'Waiting', 'Remove', '#393944', '#AAAAB3'],
+      ['Midnight Drive.flac', 'Audio · MP3 → ~/Music/Converted', 100, 'Done · Midnight Drive (converted).mp3', 'Show file', '#62C999', '#62C999'],
+      ['Interview – raw.avi', 'MP4 · H.264', 12, 'Failed · the source file could not be read', 'Details', '#FF5A63', '#FF8A8F']
+    ];
+    return {
+      presets: presets,
+      jobs: jobs.map(([name, preset, pct, status, action, color, text], i) => ({
+        name: name, preset: preset, status: status, action: action,
+        bar: 'display: block; height: 100%; border-radius: 3px; width: ' + pct + '%; background: ' + color,
+        statusStyle: 'font-size: 12px; color: ' + text,
+        rowStyle: 'display: flex; flex-wrap: wrap; align-items: center; gap: 12px 24px; padding: 14px 20px;' + (i > 0 ? ' border-top: 1px solid #393944' : '')
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>
