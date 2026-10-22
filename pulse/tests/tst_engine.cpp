@@ -56,6 +56,8 @@ private slots:
         QVERIFY2(m_engine->isReady(), "libVLC failed to initialise");
         QVERIFY(m_dir.isValid());
         m_wav = QUrl::fromLocalFile(writeWav(m_dir.filePath(QStringLiteral("tone.wav")), 3));
+        // Long enough that playback cannot end between a seek and the checks after it.
+        m_longWav = QUrl::fromLocalFile(writeWav(m_dir.filePath(QStringLiteral("long.wav")), 10));
     }
 
     void reportsCoreVersion()
@@ -80,7 +82,7 @@ private slots:
     void seeksAndPauses()
     {
         Player player;
-        player.open(m_wav);
+        player.open(m_longWav);
         QTRY_COMPARE_WITH_TIMEOUT(player.state(), Player::Playing, 10000);
         QTRY_VERIFY_WITH_TIMEOUT(player.isSeekable(), 5000);
         player.seek(2000);
@@ -309,6 +311,7 @@ private:
     Engine *m_engine = nullptr;
     QTemporaryDir m_dir;
     QUrl m_wav;
+    QUrl m_longWav;
 };
 
 QTEST_GUILESS_MAIN(EngineTest)
