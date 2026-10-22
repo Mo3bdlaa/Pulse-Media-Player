@@ -80,7 +80,9 @@ jobs:
           cmake --build build-pulse
       - name: Engine contract tests
         run: |
-          export PATH="$PWD/libvlc:$PATH" PULSE_VLC_ARGS="--aout=adummy"
+          # Qt's own MinGW runtime first: Git Bash ships a different libstdc++.
+          export PATH="$(cygpath -u "$QT_ROOT_DIR")/bin:$(cygpath -u "$IQTA_TOOLS")/mingw1310_64/bin:$PWD/libvlc:$PATH"
+          export PULSE_VLC_ARGS="--aout=adummy"
           ctest --test-dir build-pulse --output-on-failure --timeout 300
       - name: Package
         run: pulse/tools/package-windows.sh libvlc build-pulse dist "$VERSION"
