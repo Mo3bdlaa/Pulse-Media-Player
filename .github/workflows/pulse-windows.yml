@@ -85,17 +85,21 @@ jobs:
           export PULSE_VLC_ARGS="--aout=adummy"
           ctest --test-dir build-pulse --output-on-failure --timeout 300
       - name: Package
+        id: package
         run: pulse/tools/package-windows.sh libvlc build-pulse dist "$VERSION"
       - name: Smoke test
         shell: pwsh
         run: |
           $env:PULSE_VLC_ARGS = "--aout=adummy"
+          # A GUI-subsystem app logs to the debugger, not stderr, unless told to.
+          $env:QT_FORCE_STDERR_LOGGING = "1"
           $p = Start-Process -FilePath dist\Pulse\pulse.exe -PassThru -RedirectStandardError smoke.log
           Start-Sleep -Seconds 10
           if ($p.HasExited) { Get-Content smoke.log; throw "pulse.exe exited early with code $($p.ExitCode)" }
           Stop-Process -Id $p.Id -Force
           Get-Content smoke.log -ErrorAction SilentlyContinue | Select-Object -Last 20
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.package.outcome == 'success' }}
         with:
           name: pulse-windows
           path: |

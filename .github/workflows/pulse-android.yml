@@ -67,14 +67,12 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - uses: jurplel/install-qt-action@v4
-        with:
-          version: "6.8.3"
-          host: linux
-          target: android
-          arch: ${{ matrix.qtarch }}
-          autodesktop: true
-          cache: true
+      - name: Install Qt for Android
+        run: |
+          pip install -q aqtinstall
+          aqt install-qt linux desktop 6.8.3 linux_gcc_64 -O "$RUNNER_TEMP/Qt"
+          aqt install-qt linux android 6.8.3 ${{ matrix.qtarch }} -O "$RUNNER_TEMP/Qt"
+          echo "QT_ROOT_DIR=$RUNNER_TEMP/Qt/6.8.3/${{ matrix.qtarch }}" >> "$GITHUB_ENV"
       - name: Version
         run: |
           v="${{ inputs.version }}"; v="${v#v}"
