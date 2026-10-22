@@ -1,0 +1,21 @@
+# Debian/Ubuntu packages for a full-featured release build (pulse/tools/package-linux.sh).
+# Build tools
+ninja-build pkg-config pipx cmake file patchelf
+# Qt 6 (Pulse UI)
+qt6-base-dev qt6-declarative-dev qt6-svg-dev qt6-wayland libgl-dev
+qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts
+qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtquick-dialogs
+qml6-module-qtquick-shapes qml6-module-qtqml-workerscript qml6-module-qt-labs-folderlistmodel
+qml6-module-qt5compat-graphicaleffects qml6-module-qtquick-particles
+# libVLC: decoding, demuxing, encoding (Convert)
+libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libswresample-dev libpostproc-dev
+libdav1d-dev libmpg123-dev libopus-dev libvorbis-dev libogg-dev libflac-dev libspeexdsp-dev libsoxr-dev
+libdvbpsi-dev libebml-dev libmatroska-dev libtag1-dev libmad0-dev liba52-0.7.4-dev libmpeg2-4-dev
+# libVLC: audio output
+libpulse-dev libasound2-dev libpipewire-0.3-dev
+# libVLC: subtitles and text
+libass-dev libfreetype-dev libfribidi-dev libharfbuzz-dev libfontconfig-dev
+# libVLC: network, discs, hardware decoding
+libgnutls28-dev libgcrypt20-dev libxml2-dev libssh2-1-dev libnfs-dev libupnp-dev
+libbluray-dev libdvdread-dev libdvdnav-dev libva-dev libvdpau-dev libegl-dev libgles-dev
+libjpeg-dev libpng-dev zlib1g-dev libsecret-1-dev liblua5.2-dev lua5.2

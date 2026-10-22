@@ -73,7 +73,7 @@ jobs:
       - uses: actions/cache@v4
         with:
           path: build-libvlc/install
-          key: libvlc-minimal-${{ runner.os }}-${{ steps.core.outputs.tree }}
+          key: libvlc-minimal-v2-${{ runner.os }}-${{ steps.core.outputs.tree }}
       - name: Build libVLC from this tree
         run: |
           if [ ! -f build-libvlc/install/lib/pkgconfig/libvlc.pc ]; then

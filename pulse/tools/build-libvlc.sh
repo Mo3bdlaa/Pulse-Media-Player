@@ -24,9 +24,13 @@ while [ $# -gt 0 ]; do
     esac
 done
 
+# meson needs an absolute prefix; accept relative build dirs (as CI passes).
+build_dir="$(realpath -m "$build_dir")"
+
 common=(
     --prefix="$build_dir/install"
     --buildtype=release
+    --libdir=lib
     -Dqt=disabled
     -Dskins2=disabled
     -Dtests=disabled
