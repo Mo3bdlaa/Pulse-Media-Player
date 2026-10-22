@@ -99,11 +99,18 @@ jobs:
     with:
       version: ${{ needs.tag.outputs.tag }}
 
+  android:
+    name: Android
+    needs: tag
+    uses: ./.github/workflows/pulse-android.yml
+    with:
+      version: ${{ needs.tag.outputs.tag }}
+
   publish:
     name: Publish release
-    needs: [tag, linux, windows]
+    needs: [tag, linux, windows, android]
     # Publish what was built even if one platform failed.
-    if: ${{ !cancelled() && (needs.linux.result == 'success' || needs.windows.result == 'success') }}
+    if: ${{ !cancelled() && (needs.linux.result == 'success' || needs.windows.result == 'success' || needs.android.result == 'success') }}
     runs-on: ubuntu-24.04
     env:
       TAG: ${{ needs.tag.outputs.tag }}
@@ -126,4 +133,5 @@ jobs:
             dist/*.AppImage
             dist/*.zip
             dist/*.exe
+            dist/*.apk
             dist/*.sha256

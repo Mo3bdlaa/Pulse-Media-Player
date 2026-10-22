@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(PULSE_BUILD_TESTS "Build the Pulse tests" ON)
+set(PULSE_ANDROID_VERSION_CODE 1 CACHE STRING "Android versionCode (raise it for every release)")
 
 find_package(Qt6 6.4 REQUIRED COMPONENTS Core Gui Quick QuickControls2 Svg OpenGL)
 qt_standard_project_setup()
@@ -75,6 +76,17 @@ if(WIN32)
     set(PULSE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/pulse.ico")
     configure_file(packaging/windows/pulse.rc.in pulse.rc @ONLY)
     target_sources(pulse PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/pulse.rc)
+endif()
+if(ANDROID)
+    # libvlc.so (core + modules) goes into the APK next to the app library.
+    set_target_properties(pulse PROPERTIES
+        QT_ANDROID_PACKAGE_NAME org.pulse.player
+        QT_ANDROID_PACKAGE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/packaging/android
+        QT_ANDROID_EXTRA_LIBS ${PULSE_LIBVLC_LIBRARY}
+        QT_ANDROID_VERSION_NAME ${PROJECT_VERSION}
+        QT_ANDROID_VERSION_CODE ${PULSE_ANDROID_VERSION_CODE}
+        QT_ANDROID_MIN_SDK_VERSION 28
+        QT_ANDROID_TARGET_SDK_VERSION 35)
 endif()
 set_target_properties(pulse PROPERTIES
     OUTPUT_NAME pulse
@@ -188,7 +200,8 @@ qt_add_qml_module(pulse
         ${PULSE_FONTS}
 )
 
-install(TARGETS pulse BUNDLE DESTINATION . RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS pulse BUNDLE DESTINATION . RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 if(UNIX AND NOT APPLE AND NOT ANDROID)
     install(FILES packaging/linux/org.pulse.Player.desktop DESTINATION ${CMAKE_INSTALL_DATADIR}/applications)
     install(FILES assets/logo/pulse-mark.svg DESTINATION ${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps RENAME org.pulse.Player.svg)

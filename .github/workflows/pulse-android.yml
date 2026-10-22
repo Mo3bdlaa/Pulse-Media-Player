@@ -1,0 +1,123 @@
+name: Pulse Android
+
+# Builds the Android app: libVLC from this tree the way upstream CI does
+# (tools/build-libvlc-android.sh), then Pulse with Qt for Android into a signed
+# APK per ABI (tools/package-android.sh). The x86_64 APK is launched in an
+# emulator as a smoke test. Runs on pushes that touch Pulse, and from the
+# release workflow.
+
+on:
+  push:
+    paths:
+      - "pulse/**"
+      - "!pulse/packaging/release.txt"
+      - ".github/workflows/pulse-android.yml"
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+
+jobs:
+  libvlc:
+    name: libVLC for Android (${{ matrix.arch }})
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - { arch: arm64, abi: arm64-v8a }
+          - { arch: x86_64, abi: x86_64 }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Key the cache on the upstream tree
+        id: core
+        run: echo "tree=$(git rev-parse HEAD:src HEAD:modules HEAD:lib HEAD:include HEAD:contrib HEAD:configure.ac HEAD:extras/ci | sha256sum | cut -c1-16)-$(sha256sum pulse/tools/build-libvlc-android.sh | cut -c1-8)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: build-libvlc-android/install/${{ matrix.abi }}
+          key: libvlc-android-${{ matrix.abi }}-${{ steps.core.outputs.tree }}
+      - name: Build libVLC (upstream Android toolchain)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: pulse/tools/build-libvlc-android.sh build-libvlc-android ${{ matrix.arch }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libvlc-android-${{ matrix.abi }}
+          path: build-libvlc-android/install/${{ matrix.abi }}
+          retention-days: 3
+
+  apk:
+    name: Pulse APK (${{ matrix.abi }})
+    needs: libvlc
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - { abi: arm64-v8a, qtarch: android_arm64_v8a }
+          - { abi: x86_64, qtarch: android_x86_64 }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: libvlc-android-${{ matrix.abi }}
+          path: libvlc/${{ matrix.abi }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.8.3"
+          host: linux
+          target: android
+          arch: ${{ matrix.qtarch }}
+          autodesktop: true
+          cache: true
+      - name: Version
+        run: |
+          v="${{ inputs.version }}"; v="${v#v}"
+          [ -z "$v" ] && v="$(sed -n 's/^project(Pulse VERSION \([0-9.]*\).*/\1/p' pulse/CMakeLists.txt)-dev.${GITHUB_SHA::7}"
+          echo "VERSION=$v" >> "$GITHUB_ENV"
+      - name: Build and sign the APK
+        run: |
+          export ANDROID_NDK_ROOT="$ANDROID_NDK_LATEST_HOME"
+          pulse/tools/package-android.sh "libvlc/${{ matrix.abi }}" "$QT_ROOT_DIR" "$(dirname "$QT_ROOT_DIR")/gcc_64" \
+            dist "$VERSION" "${{ github.run_number }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pulse-android-${{ matrix.abi }}
+          path: |
+            dist/*.apk
+            dist/*.sha256
+
+  smoke:
+    name: Smoke test in the emulator
+    needs: apk
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pulse-android-x86_64
+          path: dist
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          script: |
+            adb install -r dist/*.apk
+            adb logcat -c
+            adb shell am start -W -n org.pulse.player/org.qtproject.qt.android.bindings.QtActivity
+            sleep 20
+            adb logcat -d > logcat.txt || true
+            grep -E "libpulse|Pulse|qml|vlc" logcat.txt | tail -60 || true
+            adb shell pidof org.pulse.player || (echo "Pulse is not running"; grep -E "FATAL|Fatal signal|AndroidRuntime" -A20 logcat.txt | head -80; exit 1)
+            if grep -qE "FATAL EXCEPTION|Fatal signal" logcat.txt; then grep -E "FATAL|Fatal signal" -A20 logcat.txt | head -80; exit 1; fi

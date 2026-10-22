@@ -19,7 +19,7 @@ root="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 out="$(realpath -m "${1:-$root/build-libvlc-win64}")"
 # The image upstream CI uses for its win64 jobs (extras/ci/gitlab-ci.yml).
 image="$(sed -n 's/^ *VLC_WIN64_IMAGE: *//p' "$root/extras/ci/gitlab-ci.yml")"
-contrib_sha="$("$root/extras/ci/get-contrib-sha.sh" | tail -n1)"
+contrib_sha="$("$root/extras/ci/get-contrib-sha.sh" win64 | tail -n1)"
 contrib_url="https://artifacts.videolan.org/vlc/win64/vlc-contrib-x86_64-w64-mingw32-$contrib_sha.tar.zst"
 
 if ! curl -fsIL -o /dev/null "$contrib_url"; then

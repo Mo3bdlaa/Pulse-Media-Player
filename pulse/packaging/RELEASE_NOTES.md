@@ -9,8 +9,16 @@ This is an **early preview (alpha)**. It is the first downloadable build: please
 | Windows 10/11 (64-bit) — installer | `Pulse-…-win64-setup.exe` |
 | Windows 10/11 (64-bit) — portable | `Pulse-…-win64.zip` |
 | Linux (64-bit) | `Pulse-…-x86_64.AppImage` |
+| Android 9+ — phones and tablets | `Pulse-…-android-arm64-v8a.apk` |
+| Android 9+ — x86_64 (emulators, some Chromebooks) | `Pulse-…-android-x86_64.apk` |
 
-macOS, Android and iOS builds are not available yet.
+macOS and iOS builds are not available yet.
+
+### Install on Android
+
+Download the `arm64-v8a` APK on the phone, open it and allow installing from
+this source when Android asks. This preview is signed with a temporary key: a
+later build with the final key will need uninstalling this one first.
 
 ### Run on Windows
 

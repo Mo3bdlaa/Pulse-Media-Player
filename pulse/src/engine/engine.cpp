@@ -6,11 +6,33 @@
 
 #include <vlc/vlc.h>
 
+#if defined(Q_OS_ANDROID)
+#include <QJniEnvironment>
+#include <dlfcn.h>
+#include <jni.h>
+#endif
+
 namespace pulse {
 
 namespace {
 Engine *s_instance = nullptr;
+
+#if defined(Q_OS_ANDROID)
+// The Android core keeps the Java VM it receives in JNI_OnLoad, which only
+// runs when Java loads the library itself. Hand it over explicitly so the
+// core works however the app loader brought libvlc.so in.
+void attachJavaVm()
+{
+    void *lib = dlopen("libvlc.so", RTLD_NOW | RTLD_NOLOAD);
+    if (!lib)
+        return;
+    using OnLoad = jint (*)(JavaVM *, void *);
+    if (auto onLoad = reinterpret_cast<OnLoad>(dlsym(lib, "JNI_OnLoad")))
+        onLoad(QJniEnvironment::javaVM(), nullptr);
+    dlclose(lib);
 }
+#endif
+} // namespace
 
 struct Engine::Private
 {
@@ -42,6 +64,9 @@ Engine::Engine(const Options &options, QObject *parent)
     for (const QByteArray &a : args)
         argv.push_back(a.constData());
 
+#if defined(Q_OS_ANDROID)
+    attachJavaVm();
+#endif
     d->vlc = libvlc_new(int(argv.size()), argv.data());
     if (!d->vlc) {
         qWarning("pulse: failed to initialise the playback core (libvlc_new)");

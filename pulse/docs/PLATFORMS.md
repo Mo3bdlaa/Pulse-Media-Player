@@ -11,10 +11,10 @@ bottom navigation, bottom sheets and touch sizing on phones.
 | Linux x86-64 | ✅ runs, verified on Xvfb | ✅ built from this tree | ✅ build, tests, smoke run | ✅ AppImage (`tools/package-linux.sh`); Flatpak next |
 | Windows x64 | ✅ same QML; frameless window, native dialogs | ✅ built from this tree with VideoLAN's win64 toolchain image and prebuilt contribs (`tools/build-libvlc-windows.sh`) | ✅ build, tests, smoke run (`pulse-windows.yml`) | ✅ installer (Inno Setup) and portable zip (`tools/package-windows.sh`) |
 | macOS (arm64, x86-64) | ✅ same QML | build with VideoLAN's macOS contribs | ⏳ next | `.app` / DMG next |
-| Android | ✅ compact layout | VideoLAN's Android build (`extras/package/android`) | ⏳ | AAB next |
+| Android (arm64, x86_64) | ✅ compact layout | ✅ built from this tree the way upstream CI does: VideoLAN's Android image and libvlcjni build script, prebuilt contribs (`tools/build-libvlc-android.sh`); one `libvlc.so` with every module | ✅ build, emulator smoke run (`pulse-android.yml`) | ✅ signed APK per ABI (`tools/package-android.sh`); Play Store AAB next |
 | iOS / iPadOS | ✅ compact layout | VideoLAN's Apple build (`extras/package/apple`) | ⏳ | IPA next |
 
-✅ done · ⏳ planned. Linux and Windows are built and tested in CI. The other
+✅ done · ⏳ planned. Linux, Windows and Android are built and tested in CI. The other
 platforms reuse the same app and engine code; what remains is building the core
 with VideoLAN's per-platform scripts (already in this tree under
 `extras/package/`) and packaging.
@@ -31,6 +31,18 @@ with VideoLAN's per-platform scripts (already in this tree under
 3. `pulse/tools/package-windows.sh` adds Qt (`windeployqt`), libVLC and its
    plugins, and builds `Pulse-<version>-win64.zip` and `…-setup.exe`
    (`packaging/windows/pulse.iss`).
+
+## Android build
+
+1. `pulse/tools/build-libvlc-android.sh <out> arm64|x86_64` (Linux + Docker)
+   runs VideoLAN's `libvlcjni/buildsystem/build-libvlc.sh` at the commit
+   upstream CI pins, in upstream's Android image, with prebuilt contribs. The
+   result is one `libvlc.so` (core and modules) plus headers. Pulse hands the
+   core the Java VM itself (`attachJavaVm()` in `src/engine/engine.cpp`), so
+   no Java bindings are needed.
+2. `pulse/tools/package-android.sh` builds Pulse with Qt for Android
+   (`QT_ANDROID_EXTRA_LIBS` bundles `libvlc.so`), then aligns and signs the
+   APK. Manifest and launcher icons: `packaging/android/`.
 
 ## Capability matrix (design.md §11)
 
