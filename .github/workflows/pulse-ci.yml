@@ -59,7 +59,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             ninja-build pkg-config pipx xvfb libgl1-mesa-dri \
-            libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libtag1-dev \
+            libavformat-dev libavcodec-dev libavutil-dev libswscale-dev libtag1-dev libpng-dev \
             qt6-base-dev qt6-declarative-dev qt6-svg-dev libgl-dev \
             qml6-module-qtquick qml6-module-qtquick-controls qml6-module-qtquick-layouts \
             qml6-module-qtquick-window qml6-module-qtquick-templates qml6-module-qtquick-dialogs \
