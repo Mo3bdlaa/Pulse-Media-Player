@@ -7,7 +7,7 @@ name: Pulse CI
 
 on:
   push:
-    branches: [master, "claude/**"]
+    branches: [master]
   pull_request:
   workflow_call:
     inputs:

@@ -1,8 +1,7 @@
 # Pulse design
 
-* **Canvas:** https://claude.ai/artifact/5FCsbGDPfgJ9UZuTYn9ruR, with 17 boards:
-  Foundations, the 12 desktop screens and 4 phone screens. The same boards are
-  checked in under `screens/` as `.dc.html` files.
+* **Boards:** 17 boards (Foundations, the 12 desktop screens and 4 phone
+  screens), checked in under `screens/` as `.dc.html` files.
 * **Tokens:** `tokens.json` is the single source for colour, type, spacing,
   radii, sizes and motion. `tools/gen-theme.py` turns it into
   `qml/theme/Theme.qml`; CI fails if the two drift apart.
