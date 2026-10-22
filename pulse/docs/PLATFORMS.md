@@ -8,16 +8,29 @@ bottom navigation, bottom sheets and touch sizing on phones.
 
 | Platform | UI | Engine (libVLC) | CI | Packaging |
 | --- | --- | --- | --- | --- |
-| Linux x86-64 | ✅ runs, verified on Xvfb | ✅ built from this tree | ✅ build, tests, smoke run | `.desktop` file; AppImage/Flatpak next |
-| Windows x64 | ✅ same QML; frameless window, native dialogs | build with VideoLAN's Windows toolchain (llvm-mingw + contribs) | ⏳ next | MSIX / NSIS next |
+| Linux x86-64 | ✅ runs, verified on Xvfb | ✅ built from this tree | ✅ build, tests, smoke run | ✅ AppImage (`tools/package-linux.sh`); Flatpak next |
+| Windows x64 | ✅ same QML; frameless window, native dialogs | ✅ built from this tree with VideoLAN's win64 toolchain image and prebuilt contribs (`tools/build-libvlc-windows.sh`) | ✅ build, tests, smoke run (`pulse-windows.yml`) | ✅ installer (Inno Setup) and portable zip (`tools/package-windows.sh`) |
 | macOS (arm64, x86-64) | ✅ same QML | build with VideoLAN's macOS contribs | ⏳ next | `.app` / DMG next |
 | Android | ✅ compact layout | VideoLAN's Android build (`extras/package/android`) | ⏳ | AAB next |
 | iOS / iPadOS | ✅ compact layout | VideoLAN's Apple build (`extras/package/apple`) | ⏳ | IPA next |
 
-✅ done · ⏳ planned. Only Linux is built and tested in CI today. The other
+✅ done · ⏳ planned. Linux and Windows are built and tested in CI. The other
 platforms reuse the same app and engine code; what remains is building the core
 with VideoLAN's per-platform scripts (already in this tree under
 `extras/package/`) and packaging.
+
+## Windows build
+
+1. `pulse/tools/build-libvlc-windows.sh` (Linux + Docker) runs upstream's
+   `extras/package/win32/build.sh` unchanged in the image upstream CI uses for
+   win64, with the prebuilt third-party libraries VideoLAN publishes for this
+   tree's contrib revision. The result is laid out like VLC for Windows
+   (`libvlc.dll`, `plugins\`, `sdk\`).
+2. Pulse is built on Windows with Qt's MinGW toolchain:
+   `cmake -DPULSE_LIBVLC_DIR=<that folder>/sdk …`.
+3. `pulse/tools/package-windows.sh` adds Qt (`windeployqt`), libVLC and its
+   plugins, and builds `Pulse-<version>-win64.zip` and `…-setup.exe`
+   (`packaging/windows/pulse.iss`).
 
 ## Capability matrix (design.md §11)
 

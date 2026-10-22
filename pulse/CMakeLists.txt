@@ -13,8 +13,27 @@ qt_standard_project_setup()
 # The playback core: libVLC 4 built from this repository's untouched upstream
 # sources (tools/build-libvlc.sh) or provided by the platform SDK.
 include(GNUInstallDirs)
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBVLC REQUIRED IMPORTED_TARGET libvlc>=4.0.0)
+# PULSE_LIBVLC_DIR points at a libVLC install (include/ and lib/) where
+# pkg-config is not at hand, e.g. the Windows build (tools/build-libvlc-windows.sh).
+set(PULSE_LIBVLC_DIR "" CACHE PATH "libVLC install prefix; empty uses pkg-config")
+if(PULSE_LIBVLC_DIR)
+    foreach(name libvlc.dll.a libvlc.lib libvlc.so libvlc.dylib)
+        if(EXISTS "${PULSE_LIBVLC_DIR}/lib/${name}")
+            set(PULSE_LIBVLC_LIBRARY "${PULSE_LIBVLC_DIR}/lib/${name}")
+            break()
+        endif()
+    endforeach()
+    if(NOT PULSE_LIBVLC_LIBRARY)
+        message(FATAL_ERROR "No libVLC library in ${PULSE_LIBVLC_DIR}/lib")
+    endif()
+    add_library(pulse_libvlc INTERFACE IMPORTED)
+    target_include_directories(pulse_libvlc INTERFACE "${PULSE_LIBVLC_DIR}/include")
+    target_link_libraries(pulse_libvlc INTERFACE "${PULSE_LIBVLC_LIBRARY}")
+else()
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(LIBVLC REQUIRED IMPORTED_TARGET libvlc>=4.0.0)
+    add_library(pulse_libvlc ALIAS PkgConfig::LIBVLC)
+endif()
 
 # --- engine adapter: the only code that talks to libVLC -----------------------
 add_library(pulse_engine STATIC
@@ -29,7 +48,7 @@ add_library(pulse_engine STATIC
 target_include_directories(pulse_engine PUBLIC src)
 target_link_libraries(pulse_engine
     PUBLIC Qt6::Core Qt6::Gui Qt6::Quick Qt6::OpenGL
-    PRIVATE PkgConfig::LIBVLC)
+    PRIVATE pulse_libvlc)
 
 # --- app services ----------------------------------------------------------------
 add_library(pulse_app STATIC
@@ -51,6 +70,12 @@ target_link_libraries(pulse_app PUBLIC pulse_engine Qt6::Core Qt6::Gui Qt6::Quic
 qt_add_executable(pulse WIN32 MACOSX_BUNDLE src/main.cpp)
 target_compile_definitions(pulse PRIVATE PULSE_VERSION="${PROJECT_VERSION}")
 target_link_libraries(pulse PRIVATE pulse_engine pulse_app Qt6::QuickControls2)
+if(WIN32)
+    enable_language(RC)
+    set(PULSE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/packaging/windows/pulse.ico")
+    configure_file(packaging/windows/pulse.rc.in pulse.rc @ONLY)
+    target_sources(pulse PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/pulse.rc)
+endif()
 set_target_properties(pulse PROPERTIES
     OUTPUT_NAME pulse
     MACOSX_BUNDLE_BUNDLE_NAME Pulse

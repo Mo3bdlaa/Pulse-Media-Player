@@ -6,9 +6,17 @@ This is an **early preview (alpha)**. It is the first downloadable build: please
 
 | System | File |
 | --- | --- |
+| Windows 10/11 (64-bit) — installer | `Pulse-…-win64-setup.exe` |
+| Windows 10/11 (64-bit) — portable | `Pulse-…-win64.zip` |
 | Linux (64-bit) | `Pulse-…-x86_64.AppImage` |
 
-Windows, macOS, Android and iOS builds are not available yet.
+macOS, Android and iOS builds are not available yet.
+
+### Run on Windows
+
+Run the `setup.exe` (no administrator rights needed) or unzip the portable
+build anywhere and start `pulse.exe`. The builds are not code-signed yet, so
+SmartScreen may warn: choose **More info → Run anyway**.
 
 ### Run on Linux
 
