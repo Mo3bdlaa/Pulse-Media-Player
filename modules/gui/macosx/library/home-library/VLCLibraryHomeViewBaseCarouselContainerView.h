@@ -23,6 +23,7 @@
 #import <Cocoa/Cocoa.h>
 
 #import "VLCLibraryHomeViewContainerView.h"
+#import "VLCLibraryHomeViewSectionHeaderView.h"
 
 #import "library/VLCLibraryCarouselView.h"
 #import "library/VLCLibraryCollectionViewDataSource.h"
@@ -34,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class VLCLibraryCollectionViewFlowLayout;
 @interface VLCLibraryHomeViewBaseCarouselContainerView : NSView<VLCLibraryHomeViewContainerView>
 
-@property (readonly) NSTextField *titleView;
+@property (readonly) VLCLibraryHomeViewSectionHeaderView *headerView;
 @property (readonly) VLCSubScrollView *scrollView;
 @property (readonly) VLCLibraryCarouselView *collectionView;
 @property (readonly) VLCLibraryCollectionViewDelegate *collectionViewDelegate;
@@ -42,9 +43,20 @@ NS_ASSUME_NONNULL_BEGIN
 @property (readonly) NSButton *leftButton;
 @property (readonly) NSButton *rightButton;
 @property (readonly) NSObject<VLCLibraryCollectionViewDataSource> *dataSource;
+@property (readonly, nullable) NSNotificationName displayedCollectionChangedNotification;
 @property (readwrite, nonatomic) CGFloat itemHeight;
 
 - (void)setup;
+// Subclasses provide their data source and route the shared header button.
+- (void)setupDataSource;
+- (void)openLibrary:(id)sender;
+
+/**
+ * Creates the collection view configured by the shared carousel setup.
+ * Subclasses can override this to customize item activation and context menus.
+ */
+- (VLCLibraryCarouselView *)newCollectionView;
+- (void)reloadData;
 
 @end
 
